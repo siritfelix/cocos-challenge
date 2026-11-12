@@ -1,5 +1,6 @@
 package ar.cocos.challenge.portfolio.orders.infrastructure;
 
+import ar.cocos.challenge.portfolio.orders.application.CancelOrderUseCase;
 import ar.cocos.challenge.portfolio.orders.application.CreateOrderRequest;
 import ar.cocos.challenge.portfolio.orders.application.CreateOrderUseCase;
 import ar.cocos.challenge.portfolio.orders.application.OrderFilter;
@@ -16,7 +17,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -42,6 +45,7 @@ public class OrderController {
 	private static final String IDEMPOTENCY_HEADER = "Idempotency-Key";
 
 	private final CreateOrderUseCase createOrderUseCase;
+	private final CancelOrderUseCase cancelOrderUseCase;
 	private final OrderHistoryUseCase orderHistoryUseCase;
 	private final OrderMapper orderMapper;
 	private final AccountResolver accountResolver;
@@ -49,14 +53,17 @@ public class OrderController {
 
 	/**
 	 * @param createOrderUseCase caso de uso de creacion de ordenes
+	 * @param cancelOrderUseCase caso de uso de cancelacion de ordenes
 	 * @param orderHistoryUseCase caso de uso de consulta del historial
 	 * @param orderMapper mapeador entre dominio y DTOs
 	 * @param accountResolver resolutor de la cuenta por su numero
 	 * @param pageRequestValidator validador de la paginacion
 	 */
-	public OrderController(CreateOrderUseCase createOrderUseCase, OrderHistoryUseCase orderHistoryUseCase,
-			OrderMapper orderMapper, AccountResolver accountResolver, PageRequestValidator pageRequestValidator) {
+	public OrderController(CreateOrderUseCase createOrderUseCase, CancelOrderUseCase cancelOrderUseCase,
+			OrderHistoryUseCase orderHistoryUseCase, OrderMapper orderMapper, AccountResolver accountResolver,
+			PageRequestValidator pageRequestValidator) {
 		this.createOrderUseCase = createOrderUseCase;
+		this.cancelOrderUseCase = cancelOrderUseCase;
 		this.orderHistoryUseCase = orderHistoryUseCase;
 		this.orderMapper = orderMapper;
 		this.accountResolver = accountResolver;
@@ -116,6 +123,25 @@ public class OrderController {
 		OrderFilter filter = OrderFilter.of(status, side, ticker);
 		Page<Order> orders = orderHistoryUseCase.query(account.id(), filter, PageRequest.of(page, size));
 		return ResponseEntity.ok(orderMapper.toPageResponse(orders));
+	}
+
+	/**
+	 * Cancela una orden pendiente.
+	 *
+	 * <p>Solo las ordenes en estado {@code NEW} son cancelables; las demas
+	 * responden {@code 409 Conflict}. Una orden inexistente o de otra cuenta
+	 * responde {@code 404 Not Found} sin revelar su existencia (spec §9).</p>
+	 *
+	 * @param accountNumber numero de cuenta
+	 * @param orderId identificador de la orden a cancelar
+	 * @return la orden cancelada
+	 */
+	@DeleteMapping("/{orderId}")
+	public ResponseEntity<OrderResponse> cancelOrder(
+			@RequestHeader(value = ACCOUNT_HEADER, required = false) String accountNumber,
+			@PathVariable("orderId") Long orderId) {
+		Order order = cancelOrderUseCase.cancel(accountNumber, orderId);
+		return ResponseEntity.ok(orderMapper.toResponse(order));
 	}
 
 }

@@ -110,6 +110,14 @@ public interface OrderRepository {
 	Page<Order> findHistory(Long accountId, OrderStatus status, OrderSide side, String ticker, Pageable pageable);
 
 	/**
+	 * Persiste un cambio de estado sobre una orden existente.
+	 *
+	 * @param order orden con el nuevo estado
+	 * @return la orden persistida
+	 */
+	Order update(Order order);
+
+	/**
 	 * Busca la ultima orden de la cuenta para un instrumento, usada para
 	 * derivar el costo promedio ponderado.
 	 *

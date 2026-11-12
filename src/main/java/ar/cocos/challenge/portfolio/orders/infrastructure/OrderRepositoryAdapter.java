@@ -147,6 +147,15 @@ public class OrderRepositoryAdapter implements OrderRepository {
 		return toDomain(entity, account, instrument);
 	}
 
+	@Override
+	@Transactional
+	public Order update(Order order) {
+		// Se actualiza solo el estado sobre la fila existente: el resto de los
+		// campos de una orden son inmutables una vez creada.
+		jpaOrderRepository.updateStatus(order.getId(), order.getStatus());
+		return order;
+	}
+
 	private OrderEntity toEntity(Order order) {
 		OrderEntity entity = new OrderEntity();
 		entity.setUserId(order.getAccount().id());

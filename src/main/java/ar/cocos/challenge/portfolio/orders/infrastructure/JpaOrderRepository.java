@@ -9,6 +9,7 @@ import ar.cocos.challenge.portfolio.orders.domain.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -156,6 +157,24 @@ public interface JpaOrderRepository extends JpaRepository<OrderEntity, Long> {
 			""")
 	Page<OrderEntity> findHistory(@Param("accountId") Long accountId, @Param("status") OrderStatus status,
 			@Param("side") OrderSide side, @Param("ticker") String ticker, Pageable pageable);
+
+	/**
+	 * Actualiza el estado de una orden existente.
+	 *
+	 * <p>Es una actualizacion dirigida por id, sin tocar el resto de los campos:
+	 * los demas atributos de una orden son inmutables una vez creada
+	 * (spec FR-049).</p>
+	 *
+	 * <p>Se limpia el contexto de persistencia despues de la actualizacion: la
+	 * entidad cargada antes del UPDATE seguiria con el estado anterior en la
+	 * sesion y podria devolver un valor obsoleto.</p>
+	 *
+	 * @param orderId identificador de la orden
+	 * @param status nuevo estado
+	 */
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Query("update OrderEntity o set o.status = :status where o.id = :orderId")
+	void updateStatus(@Param("orderId") Long orderId, @Param("status") OrderStatus status);
 
 	/**
 	 * Devuelve las ordenes ejecutadas de un par (cuenta, instrumento) ordenadas

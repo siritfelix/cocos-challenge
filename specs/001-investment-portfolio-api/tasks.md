@@ -285,15 +285,15 @@ reservados se liberan; intentar cancelar órdenes en estados terminales y verifi
 
 ### Tests for User Story 6 ⚠️
 
-- [ ] T117 [P] [US6] Test de contrato `DELETE /api/v1/orders/{orderId}` en `src/test/java/ar/cocos/challenge/portfolio/orders/infrastructure/CancelOrderContractIT.java` — cancelar `NEW` devuelve `200` con `CANCELLED`, cancelar `FILLED` devuelve `409`, cancelar `REJECTED` devuelve `409`, cancelar `CANCELLED` devuelve `409`, orden inexistente devuelve `404`, orden de otra cuenta devuelve `404`, transferencia devuelve `409`
-- [ ] T118 [P] [US6] Test de liberación de reservas en `src/test/java/ar/cocos/challenge/portfolio/orders/infrastructure/CancelOrderReservationIT.java` — tras cancelar una compra `LIMIT` el efectivo disponible vuelve a su valor previo y `reservedCash` queda en 0, tras cancelar una venta `LIMIT` la cantidad disponible de acciones vuelve a su valor previo
+- [X] T117 [P] [US6] Test de contrato `DELETE /api/v1/orders/{orderId}` en `src/test/java/ar/cocos/challenge/portfolio/orders/infrastructure/CancelOrderContractIT.java` — cancelar `NEW` devuelve `200` con `CANCELLED`, cancelar `FILLED` devuelve `409`, cancelar `REJECTED` devuelve `409`, cancelar `CANCELLED` devuelve `409`, orden inexistente devuelve `404`, orden de otra cuenta devuelve `404`, transferencia devuelve `409`
+- [X] T118 [P] [US6] Test de liberación de reservas en `src/test/java/ar/cocos/challenge/portfolio/orders/infrastructure/CancelOrderReservationIT.java` — tras cancelar una compra `LIMIT` el efectivo disponible vuelve a su valor previo y `reservedCash` queda en 0, tras cancelar una venta `LIMIT` la cantidad disponible de acciones vuelve a su valor previo
 
 ### Implementation for User Story 6
 
-- [ ] T119 [P] [US6] Crear `src/main/java/ar/cocos/challenge/portfolio/orders/domain/InvalidOrderStateException.java` — excepción de dominio mapeada a `409 Conflict` (spec §9)
-- [ ] T120 [P] [US6] Crear `src/main/java/ar/cocos/challenge/portfolio/orders/application/CancelOrderUseCase.java` — caso de uso `@Transactional` que: (1) toma el lock de la cuenta, (2) busca la orden filtrando por cuenta (404 si no existe o es de otra cuenta), (3) valida que el estado sea `NEW` (409 si no), (4) la cancela
-- [ ] T121 [US6] Crear `src/main/java/ar/cocos/challenge/portfolio/orders/infrastructure/OrderController.java` — método `DELETE /api/v1/orders/{orderId}` con header `X-AccountNumber`, respondiendo `200` con la orden cancelada
-- [ ] T122 [US6] Verificar en `src/main/java/ar/cocos/challenge/portfolio/orders/domain/ResourceCalculator.java` que las órdenes `CANCELLED` no generan reservas (la liberación es implícita: las reservas se derivan de las órdenes `NEW`)
+- [X] T119 [P] [US6] Crear `src/main/java/ar/cocos/challenge/portfolio/orders/domain/InvalidOrderStateException.java` — excepción de dominio mapeada a `409 Conflict` (spec §9)
+- [X] T120 [P] [US6] Crear `src/main/java/ar/cocos/challenge/portfolio/orders/application/CancelOrderUseCase.java` — caso de uso `@Transactional` que: (1) toma el lock de la cuenta, (2) busca la orden filtrando por cuenta (404 si no existe o es de otra cuenta), (3) valida que el estado sea `NEW` (409 si no), (4) la cancela
+- [X] T121 [US6] Crear `src/main/java/ar/cocos/challenge/portfolio/orders/infrastructure/OrderController.java` — método `DELETE /api/v1/orders/{orderId}` con header `X-AccountNumber`, respondiendo `200` con la orden cancelada
+- [X] T122 [US6] Verificar en `src/main/java/ar/cocos/challenge/portfolio/orders/domain/ResourceCalculator.java` que las órdenes `CANCELLED` no generan reservas (la liberación es implícita: las reservas se derivan de las órdenes `NEW`)
 
 **Checkpoint**: All user stories should now be independently functional
 

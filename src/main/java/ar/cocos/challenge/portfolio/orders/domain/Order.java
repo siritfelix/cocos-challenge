@@ -229,4 +229,27 @@ public class Order {
 		return new Order(orderId, account, instrument, side, size, price, type, status, rejectionReason, datetime);
 	}
 
+	/**
+	 * Cancela la orden, que pasa a estado {@code CANCELLED}.
+	 *
+	 * <p>Solo las ordenes en estado {@code NEW} son cancelables: las
+	 * ejecutadas, rechazadas y ya canceladas son terminales (spec FR-062,
+	 * FR-064).</p>
+	 *
+	 * <p>La liberacion de los recursos reservados es implicita: las reservas se
+	 * derivan de las ordenes en estado {@code NEW}, de modo que al cancelar la
+	 * orden deja de computar (spec FR-063, FR-037).</p>
+	 *
+	 * @return la orden cancelada
+	 * @throws InvalidOrderStateException si la orden no esta en estado
+	 *         {@code NEW}
+	 */
+	public Order cancel() {
+		if (status != OrderStatus.NEW) {
+			throw InvalidOrderStateException.notCancellable(id, status);
+		}
+		return new Order(id, account, instrument, side, size, price, type, OrderStatus.CANCELLED, rejectionReason,
+				datetime);
+	}
+
 }
