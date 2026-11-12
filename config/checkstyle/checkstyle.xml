@@ -35,10 +35,14 @@
         <module name="UnusedImports"/>
         <module name="RedundantImport"/>
         <module name="CustomImportOrder">
-            <!-- Convencion de imports del proyecto: estaticos, despues java.*,
-                 despues jakarta.*, y por ultimo el resto (org.*, com.*). -->
+            <!-- Convencion de imports del proyecto (estandar Spring Boot):
+                 1. imports estaticos
+                 2. java.*
+                 3. el resto (jakarta.*, org.*, com.*, io.*, ar.*)
+                 Cada grupo va separado por una linea en blanco y, dentro del
+                 grupo, los imports van ordenados alfabeticamente. -->
             <property name="customImportOrderRules"
-                      value="STATIC###STANDARD_JAVA_PACKAGE###SPECIAL_IMPORTS###THIRD_PARTY_PACKAGE"/>
+                      value="STATIC###STANDARD_JAVA_PACKAGE###THIRD_PARTY_PACKAGE"/>
             <property name="sortImportsInGroupAlphabetically" value="true"/>
             <property name="separateLineBetweenGroups" value="true"/>
         </module>

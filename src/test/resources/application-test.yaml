@@ -17,6 +17,10 @@ logging:
     ar.cocos.challenge.portfolio: INFO
     org.springframework.test: WARN
     liquibase: WARN
+    # El SQL se registra a nivel DEBUG para poder verificar en los tests de
+    # concurrencia que las consultas de bloqueo pesimista emiten efectivamente
+    # 'FOR NO KEY UPDATE' (research R-004).
+    org.hibernate.SQL: DEBUG
 
 ---
 # Los tests de integracion usan su propia fuente de datos; se desactiva la

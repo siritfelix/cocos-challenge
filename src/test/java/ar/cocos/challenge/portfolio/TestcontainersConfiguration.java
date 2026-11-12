@@ -19,7 +19,7 @@ import org.testcontainers.utility.DockerImageName;
  * oficial recomienda esta forma cuando el contexto se cachea entre clases de test.</p>
  */
 @TestConfiguration(proxyBeanMethods = false)
-class TestcontainersConfiguration {
+public class TestcontainersConfiguration {
 
 	/**
 	 * Imagen de PostgreSQL usada por los tests.
