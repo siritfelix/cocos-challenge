@@ -38,7 +38,7 @@ public class InstrumentRepositoryAdapter implements InstrumentRepository {
 	@Override
 	@Transactional(readOnly = true)
 	public List<Instrument> findAll() {
-		return jpaInstrumentRepository.findAll().stream().map(this::toDomain).toList();
+		return jpaInstrumentRepository.findAllByOrderByTickerAsc().stream().map(this::toDomain).toList();
 	}
 
 	@Override

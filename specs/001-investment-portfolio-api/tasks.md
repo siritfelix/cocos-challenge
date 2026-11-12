@@ -235,15 +235,15 @@ mayúsculas y minúsculas; verificar resultados sin duplicados, búsqueda sin co
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T102 [P] [US4] Test de contrato `GET /api/v1/instruments` en `src/test/java/ar/cocos/challenge/portfolio/instruments/InstrumentQueryContractIT.java` — sin `query` devuelve el catálogo completo e incluye `ARS` exactamente una vez, búsqueda por ticker devuelve coincidencias sin distinguir mayúsculas, búsqueda por nombre devuelve coincidencias, coincidencia por ticker y nombre simultánea no produce duplicados, búsqueda sin coincidencias devuelve `[]` con `200`, `query` vacío o solo con espacios devuelve `400`
-- [ ] T103 [P] [US4] Test unitario del caso de uso en `src/test/java/ar/cocos/challenge/portfolio/instruments/application/InstrumentQueryUseCaseTest.java` — sin `query` devuelve todos, con `query` filtra por ticker y/o nombre, `query` vacío lanza excepción de validación
+- [X] T102 [P] [US4] Test de contrato `GET /api/v1/instruments` en `src/test/java/ar/cocos/challenge/portfolio/instruments/InstrumentQueryContractIT.java` — sin `query` devuelve el catálogo completo e incluye `ARS` exactamente una vez, búsqueda por ticker devuelve coincidencias sin distinguir mayúsculas, búsqueda por nombre devuelve coincidencias, coincidencia por ticker y nombre simultánea no produce duplicados, búsqueda sin coincidencias devuelve `[]` con `200`, `query` vacío o solo con espacios devuelve `400`
+- [X] T103 [P] [US4] Test unitario del caso de uso en `src/test/java/ar/cocos/challenge/portfolio/instruments/application/InstrumentQueryUseCaseTest.java` — sin `query` devuelve todos, con `query` filtra por ticker y/o nombre, `query` vacío lanza excepción de validación
 
 ### Implementation for User Story 4
 
-- [ ] T104 [P] [US4] Crear `src/main/java/ar/cocos/challenge/portfolio/instruments/application/InstrumentQueryUseCase.java` — caso de uso que devuelve el catálogo completo o el resultado de la búsqueda
-- [ ] T105 [P] [US4] Crear `src/main/java/ar/cocos/challenge/portfolio/instruments/application/InstrumentResponse.java` — DTO con `id`, `ticker`, `name`, `type`
-- [ ] T106 [P] [US4] Crear `src/main/java/ar/cocos/challenge/portfolio/instruments/infrastructure/InstrumentMapper.java` — mapeo ModelMapper
-- [ ] T107 [US4] Crear `src/main/java/ar/cocos/challenge/portfolio/instruments/infrastructure/InstrumentController.java` — `GET /api/v1/instruments` con `@RequestParam(required=false) String query`; `query` vacío o solo espacios se rechaza con `400`
+- [X] T104 [P] [US4] Crear `src/main/java/ar/cocos/challenge/portfolio/instruments/application/InstrumentQueryUseCase.java` — caso de uso que devuelve el catálogo completo o el resultado de la búsqueda
+- [X] T105 [P] [US4] Crear `src/main/java/ar/cocos/challenge/portfolio/instruments/application/InstrumentResponse.java` — DTO con `id`, `ticker`, `name`, `type`
+- [X] T106 [P] [US4] Crear `src/main/java/ar/cocos/challenge/portfolio/instruments/infrastructure/InstrumentMapper.java` — mapeo ModelMapper
+- [X] T107 [US4] Crear `src/main/java/ar/cocos/challenge/portfolio/instruments/infrastructure/InstrumentController.java` — `GET /api/v1/instruments` con `@RequestParam(required=false) String query`; `query` vacío o solo espacios se rechaza con `400`
 
 **Checkpoint**: At this point, User Stories 1–4 should all work independently
 

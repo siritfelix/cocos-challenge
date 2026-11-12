@@ -21,6 +21,16 @@ public interface JpaInstrumentRepository extends JpaRepository<InstrumentEntity,
 	Optional<InstrumentEntity> findByTicker(String ticker);
 
 	/**
+	 * Devuelve el catalogo completo, ordenado por ticker.
+	 *
+	 * <p>El orden es determinista para que la API devuelva siempre el mismo
+	 * listado y los tests puedan verificarlo.</p>
+	 *
+	 * @return las entidades del catalogo, ordenadas por ticker
+	 */
+	List<InstrumentEntity> findAllByOrderByTickerAsc();
+
+	/**
 	 * Busca instrumentos por coincidencia parcial de ticker y/o de nombre.
 	 *
 	 * <p>La condicion es una disyuncion sobre la MISMA fila, por lo que un
