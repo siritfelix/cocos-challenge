@@ -1,2 +1,13 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+
+# El analisis estatico exige finales de linea LF: se fijan en el repositorio
+# para que core.autocrlf=true (Windows) no reescriba los archivos a CRLF.
+*.java text eol=lf
+*.xml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.py text eol=lf
+*.sql text eol=lf
+*.properties text eol=lf

@@ -51,6 +51,10 @@ paths:
         coinciden parcialmente por ticker y/o nombre (sin distinguir mayúsculas de minúsculas).
         Los resultados no contienen duplicados. El instrumento de efectivo `ARS` (tipo `MONEDA`)
         aparece en el listado.
+
+        Cada instrumento incluye además su último precio disponible y el precio de cierre
+        anterior obtenidos de su cotización más reciente registrada. Los instrumentos sin
+        cotización utilizable aparecen con esos campos sin valor.
       parameters:
         - name: query
           in: query
@@ -62,7 +66,7 @@ paths:
           example: YPF
       responses:
         '200':
-          description: Catálogo (o resultado de la búsqueda)
+          description: Catálogo (o resultado de la búsqueda) con precios
           content:
             application/json:
               schema:
@@ -74,6 +78,8 @@ paths:
                   ticker: YPFD
                   name: Y.P.F. S.A.
                   type: ACCIONES
+                  price: 7837.50
+                  previousClose: 7975.05
                 - id: 66
                   ticker: ARS
                   name: Peso argentino
@@ -410,6 +416,18 @@ components:
           maxLength: 150
         type:
           $ref: '#/components/schemas/InstrumentType'
+        price:
+          type: number
+          description: |
+            Último precio disponible del instrumento: el cierre de su cotización más
+            reciente. Ausente cuando el instrumento no tiene cotización utilizable.
+          example: 7837.50
+        previousClose:
+          type: number
+          description: |
+            Precio de cierre anterior referenciado por la cotización más reciente.
+            Ausente cuando no hay cotización utilizable o el cierre anterior no es válido.
+          example: 7975.05
 
     CreateOrderRequest:
       type: object

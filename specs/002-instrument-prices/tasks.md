@@ -32,7 +32,7 @@ description: "Task list template for feature implementation"
 
 **Purpose**: Estado de partida verificado; no hay inicialización de proyecto (ya existe)
 
-- [ ] T001 [P] Verificar el baseline del proyecto: ejecutar `python tools/normalize_imports.py` y `mvn verify` y confirmar 117 tests en verde y 0 violaciones de Checkstyle sin cambios de código (la feature solo toca el dominio `instruments`, así que el baseline protege el resto de la API)
+- [X] T001 [P] Verificar el baseline del proyecto: ejecutar `python tools/normalize_imports.py` y `mvn verify` y confirmar 117 tests en verde y 0 violaciones de Checkstyle sin cambios de código (la feature solo toca el dominio `instruments`, así que el baseline protege el resto de la API)
 
 ---
 
@@ -42,8 +42,8 @@ description: "Task list template for feature implementation"
 
 ⚠️ **CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T002 [P] Extender el puerto de dominio `src/main/java/ar/cocos/challenge/portfolio/instruments/domain/MarketDataRepository.java` con `findLatestByInstrumentIds(List<Long> instrumentIds)` que devuelva `Map<Long, LatestQuote>`: la cotización más reciente (mayor `datetime`) de cada instrumento de la lista, omitiendo los identificadores sin cotización (research R-002, data-model.md)
-- [ ] T003 Implementar la consulta en lote en `src/main/java/ar/cocos/challenge/portfolio/instruments/infrastructure/JpaMarketDataRepository.java` (JPQL: filas cuyo `datetime` es el máximo de su instrumento y cuyo `instrumentId` está en la lista) e implementar el método nuevo del puerto en `src/main/java/ar/cocos/challenge/portfolio/instruments/infrastructure/MarketDataRepositoryAdapter.java` mapeando `MarketDataEntity` → `LatestQuote` (depende de T002; costo: 1 consulta por request, prohibido el N+1)
+- [X] T002 [P] Extender el puerto de dominio `src/main/java/ar/cocos/challenge/portfolio/instruments/domain/MarketDataRepository.java` con `findLatestByInstrumentIds(List<Long> instrumentIds)` que devuelva `Map<Long, LatestQuote>`: la cotización más reciente (mayor `datetime`) de cada instrumento de la lista, omitiendo los identificadores sin cotización (research R-002, data-model.md)
+- [X] T003 Implementar la consulta en lote en `src/main/java/ar/cocos/challenge/portfolio/instruments/infrastructure/JpaMarketDataRepository.java` (JPQL: filas cuyo `datetime` es el máximo de su instrumento y cuyo `instrumentId` está en la lista) e implementar el método nuevo del puerto en `src/main/java/ar/cocos/challenge/portfolio/instruments/infrastructure/MarketDataRepositoryAdapter.java` mapeando `MarketDataEntity` → `LatestQuote` (depende de T002; costo: 1 consulta por request, prohibido el N+1)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -59,14 +59,14 @@ description: "Task list template for feature implementation"
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T004 [P] [US1] Test de contrato en `src/test/java/ar/cocos/challenge/portfolio/instruments/InstrumentPricesContractIT.java` — listado completo responde `200`; cada instrumento con cotización incluye `price` igual al cierre de su cotización más reciente del seed (`YPFD` = 7837.50) y `previousClose` igual al `previous_close` de esa fila (7975.05); el instrumento sin cotización (`ARS`, tipo `MONEDA`, sin filas en cotizaciones) aparece con `id`/`ticker`/`name`/`type` y SIN campos de precio; cada ticker aparece exactamente una vez (spec US1, escenarios 1–3; data-model.md, reglas de mapeo)
+- [X] T004 [P] [US1] Test de contrato en `src/test/java/ar/cocos/challenge/portfolio/instruments/InstrumentPricesContractIT.java` — listado completo responde `200`; cada instrumento con cotización incluye `price` igual al cierre de su cotización más reciente del seed (`YPFD` = 7837.50) y `previousClose` igual al `previous_close` de esa fila (7975.05); el instrumento sin cotización (`ARS`, tipo `MONEDA`, sin filas en cotizaciones) aparece con `id`/`ticker`/`name`/`type` y SIN campos de precio; cada ticker aparece exactamente una vez (spec US1, escenarios 1–3; data-model.md, reglas de mapeo)
 
 ### Implementation for User Story 1
 
-- [ ] T005 [P] [US1] Agregar los campos `price` y `previousClose` (ambos `BigDecimal`, opcionales) a `src/main/java/ar/cocos/challenge/portfolio/instruments/application/InstrumentResponse.java`, con javadoc documentando que se informan solo si la cotización es utilizable según `LatestQuote.isAvailable()` / `hasPreviousClose()` (research R-003, R-005; los campos actuales no cambian)
-- [ ] T006 [US1] Extender el conversor de `src/main/java/ar/cocos/challenge/portfolio/instruments/infrastructure/InstrumentMapper.java` para poblar los campos de precio desde el mapa de cotizaciones, con las reglas verbatim de data-model.md: `quote` ausente → ambos `null`; `price` = `quote.close()` solo si `quote.isAvailable()`; `previousClose` = `quote.previousClose()` solo si `quote.hasPreviousClose()` (depende de T005)
-- [ ] T007 [US1] Modificar `src/main/java/ar/cocos/challenge/portfolio/instruments/application/InstrumentQueryUseCase.java` para que, tras resolver el listado o la búsqueda, obtenga las cotizaciones con UNA llamada a `findLatestByInstrumentIds` con los identificadores del resultado y entregue el mapa al mapper (depende de T002–T006; única fuente de verdad, invariantes 1 y 4 de data-model.md)
-- [ ] T008 [US1] Integrar el delta al contrato principal `specs/001-investment-portfolio-api/contracts/openapi.yaml`: reemplazar `paths./api/v1/instruments` y `components.schemas.Instrument` por lo definido en `specs/002-instrument-prices/contracts/instruments-openapi.yaml` (`price` y `previousClose` opcionales, fuera de `required`, con ejemplos; descripción actualizada del endpoint) (depende de T004–T007; Principio VI)
+- [X] T005 [P] [US1] Agregar los campos `price` y `previousClose` (ambos `BigDecimal`, opcionales) a `src/main/java/ar/cocos/challenge/portfolio/instruments/application/InstrumentResponse.java`, con javadoc documentando que se informan solo si la cotización es utilizable según `LatestQuote.isAvailable()` / `hasPreviousClose()` (research R-003, R-005; los campos actuales no cambian)
+- [X] T006 [US1] Extender el conversor de `src/main/java/ar/cocos/challenge/portfolio/instruments/infrastructure/InstrumentMapper.java` para poblar los campos de precio desde el mapa de cotizaciones, con las reglas verbatim de data-model.md: `quote` ausente → ambos `null`; `price` = `quote.close()` solo si `quote.isAvailable()`; `previousClose` = `quote.previousClose()` solo si `quote.hasPreviousClose()` (depende de T005)
+- [X] T007 [US1] Modificar `src/main/java/ar/cocos/challenge/portfolio/instruments/application/InstrumentQueryUseCase.java` para que, tras resolver el listado o la búsqueda, obtenga las cotizaciones con UNA llamada a `findLatestByInstrumentIds` con los identificadores del resultado y entregue el mapa al mapper (depende de T002–T006; única fuente de verdad, invariantes 1 y 4 de data-model.md)
+- [X] T008 [US1] Integrar el delta al contrato principal `specs/001-investment-portfolio-api/contracts/openapi.yaml`: reemplazar `paths./api/v1/instruments` y `components.schemas.Instrument` por lo definido en `specs/002-instrument-prices/contracts/instruments-openapi.yaml` (`price` y `previousClose` opcionales, fuera de `required`, con ejemplos; descripción actualizada del endpoint) (depende de T004–T007; Principio VI)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -80,11 +80,11 @@ description: "Task list template for feature implementation"
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T009 [P] [US2] Extender `src/test/java/ar/cocos/challenge/portfolio/instruments/InstrumentPricesContractIT.java` — búsqueda case-insensitive por ticker (`query=ypf`) devuelve `YPFD` con campos de precio; búsqueda por nombre (`query=macro`) devuelve resultados con campos de precio; búsqueda sin coincidencias (`query=zzzzz`) devuelve `[]`; los instrumentos devueltos son idénticos a los del mecanismo actual (spec US2, escenarios 1–2; FR-004)
+- [X] T009 [P] [US2] Extender `src/test/java/ar/cocos/challenge/portfolio/instruments/InstrumentPricesContractIT.java` — búsqueda case-insensitive por ticker (`query=ypf`) devuelve `YPFD` con campos de precio; búsqueda por nombre (`query=macro`) devuelve resultados con campos de precio; búsqueda sin coincidencias (`query=zzzzz`) devuelve `[]`; los instrumentos devueltos son idénticos a los del mecanismo actual (spec US2, escenarios 1–2; FR-004)
 
 ### Implementation for User Story 2
 
-- [ ] T010 [US2] Verificar que el enriquecimiento de T007 en `src/main/java/ar/cocos/challenge/portfolio/instruments/application/InstrumentQueryUseCase.java` cubre el camino de búsqueda (punto único de integración después de resolver listado o búsqueda); si la implementación solo enriquece el listado completo, extenderla para que la búsqueda también pase por el mapa (esperado: sin código adicional; el test de T009 es la verificación) (depende de T007, T009)
+- [X] T010 [US2] Verificar que el enriquecimiento de T007 en `src/main/java/ar/cocos/challenge/portfolio/instruments/application/InstrumentQueryUseCase.java` cubre el camino de búsqueda (punto único de integración después de resolver listado o búsqueda); si la implementación solo enriquece el listado completo, extenderla para que la búsqueda también pase por el mapa (esperado: sin código adicional; el test de T009 es la verificación) (depende de T007, T009)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -98,11 +98,11 @@ description: "Task list template for feature implementation"
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T011 [P] [US3] Verificación de regresión en `src/test/java/ar/cocos/challenge/portfolio/instruments/InstrumentQueryContractIT.java` y `src/test/java/ar/cocos/challenge/portfolio/instruments/InstrumentCatalogIT.java` — `query` vacío o solo espacios responde `400` con la estructura de error unificada (`ErrorResponse`: timestamp, status, error, message, path); resultados sin duplicados; casos existentes pasan SIN modificaciones (si falta algún caso explícito, agregarlo en el mismo archivo) (spec US3, escenarios 1–2; FR-004, FR-007)
+- [X] T011 [P] [US3] Verificación de regresión en `src/test/java/ar/cocos/challenge/portfolio/instruments/InstrumentQueryContractIT.java` y `src/test/java/ar/cocos/challenge/portfolio/instruments/InstrumentCatalogIT.java` — `query` vacío o solo espacios responde `400` con la estructura de error unificada (`ErrorResponse`: timestamp, status, error, message, path); resultados sin duplicados; casos existentes pasan SIN modificaciones (si falta algún caso explícito, agregarlo en el mismo archivo) (spec US3, escenarios 1–2; FR-004, FR-007)
 
 ### Implementation for User Story 3
 
-- [ ] T012 [US3] Extender `src/test/java/ar/cocos/challenge/portfolio/contracts/OpenApiContractIT.java` — el schema `Instrument` publicado en runtime (`/v3/api-docs`) declara `price` y `previousClose` y los dos quedan FUERA de `required`; el conjunto de paths del runtime sigue coincidiendo con el contrato principal actualizado (depende de T008; Principio VI)
+- [X] T012 [US3] Extender `src/test/java/ar/cocos/challenge/portfolio/contracts/OpenApiContractIT.java` — el schema `Instrument` publicado en runtime (`/v3/api-docs`) declara `price` y `previousClose` y los dos quedan FUERA de `required`; el conjunto de paths del runtime sigue coincidiendo con el contrato principal actualizado (depende de T008; Principio VI)
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -112,9 +112,9 @@ description: "Task list template for feature implementation"
 
 **Purpose**: Cierre documental y verificación final
 
-- [ ] T013 [P] Actualizar `README.md`: describir los campos `price`/`previousClose` del catálogo en la sección de API y agregar un ejemplo de respuesta del listado con precios (Principio VII: documentación al día)
-- [ ] T014 Ejecutar la validación completa de `specs/002-instrument-prices/quickstart.md` contra la aplicación en marcha (`docker compose up -d`, escenarios 4.1–4.5 incluido el invariante "el price del catálogo == el price de una compra a mercado") y registrar los resultados en el resumen de la fase (depende de T004–T012)
-- [ ] T015 Ejecutar `./mvnw verify`: compila, suite completa en verde (117 tests previos + los nuevos), 0 violaciones de Checkstyle; marcar como completadas las tareas de este archivo al cierre de cada fase (final)
+- [X] T013 [P] Actualizar `README.md`: describir los campos `price`/`previousClose` del catálogo en la sección de API y agregar un ejemplo de respuesta del listado con precios (Principio VII: documentación al día)
+- [X] T014 Ejecutar la validación completa de `specs/002-instrument-prices/quickstart.md` contra la aplicación en marcha (`docker compose up -d`, escenarios 4.1–4.5 incluido el invariante "el price del catálogo == el price de una compra a mercado") y registrar los resultados en el resumen de la fase (depende de T004–T012)
+- [X] T015 Ejecutar `./mvnw verify`: compila, suite completa en verde (117 tests previos + los nuevos), 0 violaciones de Checkstyle; marcar como completadas las tareas de este archivo al cierre de cada fase (final)
 
 ---
 

@@ -4,7 +4,7 @@ import java.util.List;
 
 import ar.cocos.challenge.portfolio.instruments.application.InstrumentQueryUseCase;
 import ar.cocos.challenge.portfolio.instruments.application.InstrumentResponse;
-import ar.cocos.challenge.portfolio.instruments.domain.Instrument;
+import ar.cocos.challenge.portfolio.instruments.domain.QuotedInstrument;
 import ar.cocos.challenge.portfolio.shared.infrastructure.ErrorResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -46,11 +46,14 @@ public class InstrumentController {
 	 * @return el catalogo o los instrumentos que coinciden
 	 */
 	@GetMapping
-	@ApiResponses(@ApiResponse(responseCode = "400", description = "Solicitud invalida o error de validacion",
-			content = @Content(schema = @Schema(implementation = ErrorResponse.class))))
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Catálogo (o resultado de la búsqueda) con precios",
+					content = @Content(schema = @Schema(implementation = InstrumentResponse.class))),
+			@ApiResponse(responseCode = "400", description = "Solicitud invalida o error de validacion",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 	public ResponseEntity<List<InstrumentResponse>> getInstruments(
 			@RequestParam(required = false) String query) {
-		List<Instrument> instruments = instrumentQueryUseCase.query(query);
+		List<QuotedInstrument> instruments = instrumentQueryUseCase.query(query);
 		return ResponseEntity.ok(instrumentMapper.toResponses(instruments));
 	}
 
