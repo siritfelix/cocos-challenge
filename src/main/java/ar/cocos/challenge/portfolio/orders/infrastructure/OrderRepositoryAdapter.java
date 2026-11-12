@@ -89,6 +89,12 @@ public class OrderRepositoryAdapter implements OrderRepository {
 
 	@Override
 	@Transactional(readOnly = true)
+	public List<Long> findInstrumentsWithPosition(Long accountId) {
+		return jpaOrderRepository.findInstrumentsWithPosition(accountId);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
 	public List<Order> findExecutedTradesInChronologicalOrder(Long accountId, Long instrumentId) {
 		List<OrderEntity> entities = jpaOrderRepository.findExecutedTradesInChronologicalOrder(accountId,
 				instrumentId, TRADE_SIDES);

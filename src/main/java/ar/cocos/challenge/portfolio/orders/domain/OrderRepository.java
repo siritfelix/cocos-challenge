@@ -1,6 +1,7 @@
 package ar.cocos.challenge.portfolio.orders.domain;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -81,6 +82,18 @@ public interface OrderRepository {
 	BigDecimal sumReservedShares(Long accountId, Long instrumentId);
 
 	/**
+	 * Devuelve los identificadores de los instrumentos en los que la cuenta
+	 * tiene alguna operacion sobre acciones.
+	 *
+	 * <p>Permite listar las posiciones del portfolio sin recorrer el catalogo
+	 * completo de instrumentos (spec FR-069, FR-079).</p>
+	 *
+	 * @param accountId identificador de la cuenta
+	 * @return los identificadores de los instrumentos con posicion
+	 */
+	List<Long> findInstrumentsWithPosition(Long accountId);
+
+	/**
 	 * Busca la ultima orden de la cuenta para un instrumento, usada para
 	 * derivar el costo promedio ponderado.
 	 *
@@ -88,6 +101,6 @@ public interface OrderRepository {
 	 * @param instrumentId identificador del instrumento
 	 * @return las ordenes ejecutadas del par, ordenadas por fecha ascendente
 	 */
-	java.util.List<Order> findExecutedTradesInChronologicalOrder(Long accountId, Long instrumentId);
+	List<Order> findExecutedTradesInChronologicalOrder(Long accountId, Long instrumentId);
 
 }

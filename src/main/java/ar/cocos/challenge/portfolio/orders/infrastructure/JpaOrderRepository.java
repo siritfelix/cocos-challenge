@@ -101,6 +101,29 @@ public interface JpaOrderRepository extends JpaRepository<OrderEntity, Long> {
 	BigDecimal sumReservedShares(@Param("accountId") Long accountId, @Param("instrumentId") Long instrumentId);
 
 	/**
+	 * Devuelve los instrumentos en los que la cuenta tiene posicion.
+	 *
+	 * <p>Se consideran las operaciones sobre acciones: las transferencias de
+	 * efectivo no generan posicion (spec FR-053). Se excluyen los instrumentos
+	 * cuya cantidad neta es cero, que no constituyen una posicion (spec
+	 * FR-079).</p>
+	 *
+	 * @param accountId identificador de la cuenta
+	 * @return los identificadores de los instrumentos con posicion
+	 */
+	@Query(value = """
+			SELECT o.instrument_id
+			FROM orders o
+			WHERE o.user_id = :accountId
+			  AND o.side IN ('BUY', 'SELL')
+			GROUP BY o.instrument_id
+			HAVING COALESCE(SUM(
+			    CASE WHEN o.side = 'BUY' THEN o.size ELSE -o.size END
+			    ), 0) <> 0
+			""", nativeQuery = true)
+	List<Long> findInstrumentsWithPosition(@Param("accountId") Long accountId);
+
+	/**
 	 * Devuelve las ordenes ejecutadas de un par (cuenta, instrumento) ordenadas
 	 * de forma cronologica.
 	 *

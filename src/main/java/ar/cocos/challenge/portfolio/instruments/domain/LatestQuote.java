@@ -32,10 +32,14 @@ public record LatestQuote(BigDecimal close, BigDecimal previousClose, LocalDateT
 	/**
 	 * Indica si el cierre anterior permite calcular el rendimiento diario.
 	 *
+	 * <p>Solo un cierre anterior estrictamente positivo es un dato valido: un
+	 * valor cero o negativo produciria un rendimiento sin sentido o una
+	 * division por cero (spec FR-075).</p>
+	 *
 	 * @return {@code true} si el cierre anterior es un valor valido
 	 */
 	public boolean hasPreviousClose() {
-		return previousClose != null && previousClose.signum() != 0;
+		return previousClose != null && previousClose.signum() > 0;
 	}
 
 }
