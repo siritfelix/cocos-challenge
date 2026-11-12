@@ -1,0 +1,32 @@
+# Contexto de build de la imagen: solo lo necesario para compilar.
+.git
+.gitignore
+.github
+.vscode
+.idea
+*.iml
+
+# Artefactos de build
+target/
+build/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Configuracion local y secretos
+.env
+.env.*
+!.env.example
+application-local-override.yaml
+
+# Documentacion y especificaciones (no forman parte de la imagen)
+specs/
+*.md
+!README.md
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Logs
+*.log
+logs/

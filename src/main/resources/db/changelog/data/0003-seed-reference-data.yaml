@@ -1,0 +1,1130 @@
+databaseChangeLog:
+
+  # ---------------------------------------------------------------------
+  # users - cuentas de referencia. El numero de cuenta (account_number)
+  # es el identificador que viaja en la cabecera X-AccountNumber.
+  # ---------------------------------------------------------------------
+  - changeSet:
+      id: 0003-001-seed-users
+      author: portfolio
+      preConditions:
+        onFail: MARK_RAN
+        onFailMessage: usuarios ya cargados
+        # Se aplica solo si la tabla aun no tiene filas (count = 0).
+        sqlCheck:
+          expectedResult: 0
+          sql: SELECT COUNT(*) FROM users
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: email
+                  value: "emiliano@test.com"
+              - column:
+                  name: account_number
+                  value: "10001"
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: email
+                  value: "jose@test.com"
+              - column:
+                  name: account_number
+                  value: "10002"
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: email
+                  value: "francisco@test.com"
+              - column:
+                  name: account_number
+                  value: "10003"
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: email
+                  value: "juan@test.com"
+              - column:
+                  name: account_number
+                  value: "10004"
+
+  # ---------------------------------------------------------------------
+  # instruments - catalogo de referencia. ARS es el instrumento de
+  # efectivo (tipo MONEDA) y no es operable como compra ni venta.
+  # ---------------------------------------------------------------------
+  - changeSet:
+      id: 0003-002-seed-instruments
+      author: portfolio
+      preConditions:
+        onFail: MARK_RAN
+        onFailMessage: instrumentos ya cargados
+        # Se aplica solo si la tabla aun no tiene filas (count = 0).
+        sqlCheck:
+          expectedResult: 0
+          sql: SELECT COUNT(*) FROM instruments
+      changes:
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "DYCA"
+              - column:
+                  name: name
+                  value: "Dycasa S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "CAPX"
+              - column:
+                  name: name
+                  value: "Capex S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "PGR"
+              - column:
+                  name: name
+                  value: "Phoenix Global Resources"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "MOLA"
+              - column:
+                  name: name
+                  value: "Molinos Agro S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "MIRG"
+              - column:
+                  name: name
+                  value: "Mirgor"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "PATA"
+              - column:
+                  name: name
+                  value: "Importadora y Exportadora de la Patagonia"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "TECO2"
+              - column:
+                  name: name
+                  value: "Telecom"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "FERR"
+              - column:
+                  name: name
+                  value: "Ferrum S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "SAMI"
+              - column:
+                  name: name
+                  value: "S.A San Miguel"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "IRCP"
+              - column:
+                  name: name
+                  value: "IRSA Propiedades Comerciales S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "GAMI"
+              - column:
+                  name: name
+                  value: "Boldt Gaming S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "DOME"
+              - column:
+                  name: name
+                  value: "Domec"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "INTR"
+              - column:
+                  name: name
+                  value: "Compañía Introductora de Buenos Aires S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "MTR"
+              - column:
+                  name: name
+                  value: "Matba Rofex S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "FIPL"
+              - column:
+                  name: name
+                  value: "Fiplasto"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "GARO"
+              - column:
+                  name: name
+                  value: "Garovaglio Y Zorraquín"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "SEMI"
+              - column:
+                  name: name
+                  value: "Molinos Juan Semino"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "HARG"
+              - column:
+                  name: name
+                  value: "Holcim (Argentina) S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "BPAT"
+              - column:
+                  name: name
+                  value: "Banco Patagonia"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "RIGO"
+              - column:
+                  name: name
+                  value: "Rigolleau S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "CVH"
+              - column:
+                  name: name
+                  value: "Cablevision Holding"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "BBAR"
+              - column:
+                  name: name
+                  value: "Banco Frances"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "LEDE"
+              - column:
+                  name: name
+                  value: "Ledesma"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "CELU"
+              - column:
+                  name: name
+                  value: "Celulosa Argentina S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "CECO2"
+              - column:
+                  name: name
+                  value: "Central Costanera"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "AGRO"
+              - column:
+                  name: name
+                  value: "Agrometal"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "AUSO"
+              - column:
+                  name: name
+                  value: "Autopistas del Sol"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "BHIP"
+              - column:
+                  name: name
+                  value: "Banco Hipotecario S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "BOLT"
+              - column:
+                  name: name
+                  value: "Boldt S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "CARC"
+              - column:
+                  name: name
+                  value: "Carboclor S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "BMA"
+              - column:
+                  name: name
+                  value: "Banco Macro S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "CRES"
+              - column:
+                  name: name
+                  value: "Cresud S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "EDN"
+              - column:
+                  name: name
+                  value: "Edenor S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "GGAL"
+              - column:
+                  name: name
+                  value: "Grupo Financiero Galicia"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "DGCU2"
+              - column:
+                  name: name
+                  value: "Distribuidora De Gas Cuyano S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "GBAN"
+              - column:
+                  name: name
+                  value: "Gas Natural Ban S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "CGPA2"
+              - column:
+                  name: name
+                  value: "Camuzzi Gas del Sur"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "CADO"
+              - column:
+                  name: name
+                  value: "Carlos Casado"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "GCLA"
+              - column:
+                  name: name
+                  value: "Grupo Clarin S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "GRIM"
+              - column:
+                  name: name
+                  value: "Grimoldi"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "RICH"
+              - column:
+                  name: name
+                  value: "Laboratorios Richmond"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "MOLI"
+              - column:
+                  name: name
+                  value: "Molinos Río de la Plata"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "VALO"
+              - column:
+                  name: name
+                  value: "BCO DE VALORES ACCIONES ORD."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "TGNO4"
+              - column:
+                  name: name
+                  value: "Transportadora de Gas del Norte"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "LOMA"
+              - column:
+                  name: name
+                  value: "Loma Negra S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "IRSA"
+              - column:
+                  name: name
+                  value: "IRSA Inversiones y Representaciones S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "PAMP"
+              - column:
+                  name: name
+                  value: "Pampa Holding S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "TGSU2"
+              - column:
+                  name: name
+                  value: "Transportadora de Gas del Sur"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "TXAR"
+              - column:
+                  name: name
+                  value: "Ternium Argentina S.A"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "YPFD"
+              - column:
+                  name: name
+                  value: "Y.P.F. S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "MORI"
+              - column:
+                  name: name
+                  value: "Morixe Hermanos S.A.C.I."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "INVJ"
+              - column:
+                  name: name
+                  value: "Inversora Juramento S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "POLL"
+              - column:
+                  name: name
+                  value: "Polledo S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "METR"
+              - column:
+                  name: name
+                  value: "MetroGAS S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "LONG"
+              - column:
+                  name: name
+                  value: "Longvie"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "SUPV"
+              - column:
+                  name: name
+                  value: "Grupo Supervielle S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "ROSE"
+              - column:
+                  name: name
+                  value: "Instituto Rosenbusch"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "OEST"
+              - column:
+                  name: name
+                  value: "Oeste Grupo Concesionario"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "COME"
+              - column:
+                  name: name
+                  value: "Sociedad Comercial Del Plata"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "CEPU"
+              - column:
+                  name: name
+                  value: "Central Puerto"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "ALUA"
+              - column:
+                  name: name
+                  value: "Aluar Aluminio Argentino S.A.I.C."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "CTIO"
+              - column:
+                  name: name
+                  value: "Consultatio S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "TRAN"
+              - column:
+                  name: name
+                  value: "Transener S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "HAVA"
+              - column:
+                  name: name
+                  value: "Havanna Holding"
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "BYMA"
+              - column:
+                  name: name
+                  value: "Bolsas y Mercados Argentinos S.A."
+              - column:
+                  name: type
+                  value: "ACCIONES"
+        - insert:
+            tableName: instruments
+            columns:
+              - column:
+                  name: ticker
+                  value: "ARS"
+              - column:
+                  name: name
+                  value: "Peso argentino"
+              - column:
+                  name: type
+                  value: "MONEDA"
+
+  # ---------------------------------------------------------------------
+  # marketdata - cotizaciones de referencia. Se resuelven por ticker
+  # para no depender del id generado. previous_close difiere de close
+  # para poder verificar el rendimiento diario.
+  # ---------------------------------------------------------------------
+  - changeSet:
+      id: 0003-003-seed-marketdata
+      author: portfolio
+      preConditions:
+        onFail: MARK_RAN
+        onFailMessage: cotizaciones ya cargadas
+        # Se aplica solo si la tabla aun no tiene filas (count = 0).
+        sqlCheck:
+          expectedResult: 0
+          sql: SELECT COUNT(*) FROM marketdata
+      changes:
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 20.50, 20.50, 20.50, 20.50, 20.50, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'DOME'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 342.50, 328.50, 337.50, 341.50, 335.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'DGCU2'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 232.00, 222.50, 232.00, 232.00, 229.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'METR'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 36.55, 35.75, 35.90, 35.95, 35.90, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'MORI'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 105.00, 98.50, 105.00, 99.70, 103.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'INVJ'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 365.95, 354.45, 358.00, 364.80, 353.45, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'CEPU'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 1541.00, 1415.00, 1425.00, 1520.25, 1413.50, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'BMA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 400.00, 395.00, 400.00, 397.50, 400.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'GRIM'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 7044.00, 6561.00, 6940.00, 6621.50, 6659.50, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'MOLA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 409.00, 388.50, 407.00, 400.50, 408.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'CGPA2'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 669.50, 655.00, 668.00, 668.00, 658.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'TGNO4'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 378.00, 366.00, 367.50, 373.00, 367.50, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'TRAN'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 525.00, 494.00, 500.00, 515.50, 498.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'HARG'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 6.80, 6.66, 6.70, 6.75, 6.64, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'CARC'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 195.00, 187.00, 188.00, 192.75, 187.50, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'CECO2'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 295.00, 266.00, 273.00, 289.00, 273.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'BPAT'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 256.00, 241.25, 245.00, 251.50, 247.25, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'PATA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 86.50, 84.00, 86.50, 86.00, 86.40, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'GAMI'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 54.00, 51.50, 53.00, 53.20, 52.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'SEMI'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 1170.00, 1107.00, 1107.00, 1163.00, 1122.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'HAVA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 1660.00, 1562.00, 1567.00, 1656.00, 1562.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'CVH'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 348.00, 298.00, 307.00, 337.00, 304.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'LEDE'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 460.00, 433.00, 450.00, 449.65, 447.75, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'GCLA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 268.00, 255.00, 268.00, 260.00, 264.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'DYCA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 38.50, 37.00, 38.15, 37.55, 38.15, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'FERR'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 220.50, 217.00, 217.00, 220.00, 217.50, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'OEST'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 617.00, 612.50, 617.00, 615.00, 612.50, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'MTR'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 1930.00, 1850.00, 1850.00, 1918.00, 1885.50, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'CAPX'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 8.90, 8.72, 8.80, 8.79, 8.76, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'BOLT'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 330.00, 311.00, 330.00, 323.00, 325.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'GBAN'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 640.00, 615.00, 640.00, 623.00, 631.50, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'AUSO'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 535.00, 495.00, 535.00, 519.00, 530.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'CTIO'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 66.00, 64.00, 64.00, 66.00, 65.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'FIPL'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 75.00, 75.00, 75.00, 75.00, 72.30, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'INTR'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 140.00, 132.00, 134.25, 138.00, 136.75, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'AGRO'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 313.50, 302.00, 309.00, 310.00, 306.50, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'CELU'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 430.00, 408.30, 415.00, 429.45, 405.10, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'CRES'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 1076.90, 1031.00, 1039.00, 1062.20, 1020.90, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'BBAR'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 21.40, 21.40, 21.40, 21.40, 21.40, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'ROSE'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 315.00, 305.00, 313.00, 310.00, 313.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'SAMI'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 368.00, 360.00, 363.50, 362.00, 360.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'BYMA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 43.20, 40.20, 40.45, 42.90, 39.90, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'COME'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 546.00, 502.00, 508.50, 543.00, 500.50, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'RICH'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 163.50, 160.00, 162.25, 163.25, 162.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'CADO'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 9297.50, 9121.00, 9150.00, 9278.00, 9114.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'MIRG'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 412.00, 391.00, 391.00, 412.00, 391.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'ALUA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 19.40, 18.70, 18.90, 19.05, 19.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'LONG'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 682.00, 646.00, 663.00, 657.50, 661.50, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'MOLI'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 565.00, 540.00, 540.00, 565.00, 580.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'RIGO'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 925.85, 875.00, 875.00, 917.75, 864.90, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'GGAL'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 439.00, 421.00, 428.35, 431.90, 428.60, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'IRSA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 746.00, 701.80, 701.80, 734.35, 696.60, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'LOMA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 924.60, 896.00, 900.00, 921.80, 893.65, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'PAMP'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 340.25, 311.60, 311.60, 338.85, 311.60, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'SUPV'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 684.50, 665.70, 670.00, 672.65, 664.25, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'TECO2'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 1440.00, 1403.65, 1410.50, 1437.55, 1394.20, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'TGSU2'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 458.00, 425.50, 428.00, 448.00, 428.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'TXAR'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 110.00, 106.00, 107.00, 108.50, 106.50, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'VALO'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 8035.00, 7746.55, 7746.55, 7975.05, 7673.65, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'YPFD'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 58.50, 56.00, 56.00, 56.10, 56.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'GARO'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 62.00, 62.00, 62.00, 62.00, 62.00, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'POLL'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 35.00, 31.90, 33.00, 34.60, 33.15, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'BHIP'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 421.30, 382.00, 394.00, 418.50, 381.65, TIMESTAMP '2023-07-13 00:00:00' FROM instruments WHERE ticker = 'EDN'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 523.00, 510.00, 520.00, 520.00, 519.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'CTIO'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 20.50, 20.50, 20.50, 20.50, 20.50, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'DOME'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 669.00, 638.00, 657.50, 648.50, 657.50, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'MOLI'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 340.00, 333.00, 336.00, 338.00, 341.50, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'DGCU2'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 93.00, 68.50, 69.00, 88.70, 66.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'FIPL'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 233.00, 225.25, 232.00, 229.50, 232.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'METR'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 1435.55, 1380.00, 1434.05, 1397.70, 1437.55, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'TGSU2'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 36.70, 34.60, 35.80, 36.00, 35.95, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'MORI'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 77.00, 74.80, 74.90, 77.00, 75.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'INTR'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 103.00, 98.00, 101.00, 102.00, 99.70, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'INVJ'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 565.00, 565.00, 565.00, 565.00, 565.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'RIGO'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 369.65, 356.25, 369.65, 363.00, 364.80, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'CEPU'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 140.00, 134.25, 138.00, 138.00, 138.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'AGRO'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 1560.00, 1470.00, 1525.00, 1502.80, 1520.25, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'BMA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 57.00, 55.00, 55.00, 56.10, 56.10, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'GARO'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 395.00, 390.00, 395.00, 392.50, 397.50, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'GRIM'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 322.50, 295.00, 295.00, 322.00, 310.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'CELU'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 6840.00, 6500.00, 6650.00, 6640.00, 6621.50, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'MOLA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 918.90, 870.00, 915.80, 885.80, 917.75, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'GGAL'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 412.00, 388.00, 390.00, 400.50, 400.50, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'CGPA2'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 429.50, 410.00, 421.50, 424.25, 429.45, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'CRES'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 668.50, 640.50, 668.00, 650.00, 668.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'TGNO4'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 455.00, 426.00, 455.00, 429.00, 448.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'TXAR'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 373.00, 360.00, 373.00, 369.50, 373.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'TRAN'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 1062.00, 1002.00, 1047.00, 1038.10, 1047.17, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'BBAR'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 516.00, 500.50, 515.00, 505.50, 515.50, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'HARG'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 431.80, 419.30, 431.80, 420.10, 431.90, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'IRSA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 7.02, 6.80, 6.80, 7.00, 6.75, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'CARC'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 21.40, 21.40, 21.40, 21.40, 21.40, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'ROSE'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 196.00, 189.00, 190.00, 195.00, 192.75, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'CECO2'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 35.50, 32.60, 35.40, 33.40, 34.60, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'BHIP'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 291.00, 275.00, 291.00, 279.00, 289.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'BPAT'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 317.00, 305.50, 312.00, 309.50, 310.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'SAMI'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 257.00, 244.00, 252.50, 251.00, 251.50, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'PATA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 744.45, 724.00, 730.00, 734.65, 734.35, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'LOMA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 86.90, 84.00, 86.90, 84.30, 86.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'GAMI'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 370.50, 361.00, 363.00, 369.50, 362.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'BYMA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 58.00, 53.00, 53.50, 57.20, 53.20, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'SEMI'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 110.00, 106.00, 106.50, 107.50, 108.50, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'VALO'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 1190.00, 1150.00, 1170.00, 1180.00, 1163.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'HAVA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 43.30, 41.75, 43.00, 42.75, 42.90, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'COME'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 1680.00, 1580.00, 1659.50, 1660.00, 1656.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'CVH'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 927.70, 902.05, 920.15, 925.85, 921.80, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'PAMP'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 350.00, 320.00, 338.50, 341.50, 337.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'LEDE'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 579.00, 525.00, 546.00, 550.00, 543.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'RICH'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 455.00, 437.00, 455.00, 450.60, 449.65, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'GCLA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 60.00, 60.00, 60.00, 60.00, 62.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'POLL'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 278.00, 240.00, 260.00, 259.00, 260.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'DYCA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 167.00, 161.50, 165.00, 166.50, 163.25, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'CADO'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 39.00, 37.80, 38.80, 38.80, 37.55, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'FERR'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 335.55, 322.00, 335.15, 328.10, 338.85, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'SUPV'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 220.25, 214.00, 219.50, 220.25, 220.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'OEST'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 9299.50, 8899.50, 9299.50, 9163.00, 9278.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'MIRG'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 615.00, 614.50, 615.00, 615.00, 615.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'MTR'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 7901.25, 7752.00, 7901.25, 7837.50, 7975.05, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'YPFD'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 1920.00, 1850.00, 1850.00, 1865.00, 1918.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'CAPX'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 413.00, 395.00, 411.50, 410.00, 412.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'ALUA'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 8.94, 8.80, 8.84, 8.93, 8.79, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'BOLT'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 675.00, 647.00, 674.00, 651.85, 672.65, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'TECO2'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 316.00, 311.00, 311.00, 315.00, 323.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'GBAN'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 19.30, 18.75, 19.10, 19.00, 19.05, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'LONG'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 636.00, 620.00, 636.00, 624.00, 623.00, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'AUSO'
+        - sql:
+            sql: INSERT INTO marketdata (instrument_id, high, low, open, close, previous_close, datetime) SELECT id, 418.50, 407.20, 418.00, 414.70, 418.50, TIMESTAMP '2023-07-14 00:00:00' FROM instruments WHERE ticker = 'EDN'

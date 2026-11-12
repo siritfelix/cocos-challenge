@@ -1,0 +1,24 @@
+# Perfil local: logging detallado para desarrollo.
+spring:
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+logging:
+  level:
+    root: INFO
+    ar.cocos.challenge.portfolio: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.springframework.web: DEBUG
+    liquibase: INFO
+
+---
+# Documentacion interactiva de la API disponible solo en local.
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

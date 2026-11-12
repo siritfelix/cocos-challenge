@@ -1,0 +1,31 @@
+# Perfil de tests: la conexion la provee Testcontainers via @ServiceConnection,
+# por lo que no se declaran credenciales reales (Principio VII).
+spring:
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+logging:
+  level:
+    root: WARN
+    ar.cocos.challenge.portfolio: INFO
+    org.springframework.test: WARN
+    liquibase: WARN
+    # El SQL se registra a nivel DEBUG para poder verificar en los tests de
+    # concurrencia que las consultas de bloqueo pesimista emiten efectivamente
+    # 'FOR NO KEY UPDATE' (research R-004).
+    org.hibernate.SQL: DEBUG
+
+---
+# Los tests de integracion usan su propia fuente de datos; se desactiva la
+# autoconfiguracion de Testcontainers para que cada test controle su ciclo de vida.
+spring:
+  test:
+    database:
+      replace: none

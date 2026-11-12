@@ -1,0 +1,126 @@
+databaseChangeLog:
+
+  # ---------------------------------------------------------------------------
+  # orders (user_id, datetime DESC) - historial de la cuenta, orden descendente.
+  # ---------------------------------------------------------------------------
+  - changeSet:
+      id: 0002-001-index-orders-user-datetime
+      author: portfolio
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          indexExists:
+            tableName: orders
+            indexName: idx_orders_user_datetime
+      changes:
+        - createIndex:
+            tableName: orders
+            indexName: idx_orders_user_datetime
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: datetime
+                  descending: true
+
+  # ---------------------------------------------------------------------------
+  # orders (user_id, status, datetime DESC) - historial filtrado por estado.
+  # ---------------------------------------------------------------------------
+  - changeSet:
+      id: 0002-002-index-orders-user-status-datetime
+      author: portfolio
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          indexExists:
+            tableName: orders
+            indexName: idx_orders_user_status_datetime
+      changes:
+        - createIndex:
+            tableName: orders
+            indexName: idx_orders_user_status_datetime
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: status
+              - column:
+                  name: datetime
+                  descending: true
+
+  # ---------------------------------------------------------------------------
+  # orders (instrument_id, status) - posiciones por instrumento.
+  # ---------------------------------------------------------------------------
+  - changeSet:
+      id: 0002-003-index-orders-instrument-status
+      author: portfolio
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          indexExists:
+            tableName: orders
+            indexName: idx_orders_instrument_status
+      changes:
+        - createIndex:
+            tableName: orders
+            indexName: idx_orders_instrument_status
+            columns:
+              - column:
+                  name: instrument_id
+              - column:
+                  name: status
+
+  # ---------------------------------------------------------------------------
+  # orders (user_id, instrument_id, status, datetime, id) - soporte del fold
+  # ordenado del costo promedio ponderado. El desempate por id (monotona)
+  # garantiza que dos lecturas concurrentes calculen el mismo costo promedio
+  # para la misma posicion (research R-009, R-010).
+  # ---------------------------------------------------------------------------
+  - changeSet:
+      id: 0002-004-index-orders-user-instrument-status-datetime-id
+      author: portfolio
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          indexExists:
+            tableName: orders
+            indexName: idx_orders_user_instrument_status_datetime_id
+      changes:
+        - createIndex:
+            tableName: orders
+            indexName: idx_orders_user_instrument_status_datetime_id
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: instrument_id
+              - column:
+                  name: status
+              - column:
+                  name: datetime
+              - column:
+                  name: id
+
+  # ---------------------------------------------------------------------------
+  # marketdata (instrument_id, datetime DESC) - ultima cotizacion por
+  # instrumento.
+  # ---------------------------------------------------------------------------
+  - changeSet:
+      id: 0002-005-index-marketdata-instrument-datetime
+      author: portfolio
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          indexExists:
+            tableName: marketdata
+            indexName: idx_marketdata_instrument_datetime
+      changes:
+        - createIndex:
+            tableName: marketdata
+            indexName: idx_marketdata_instrument_datetime
+            columns:
+              - column:
+                  name: instrument_id
+              - column:
+                  name: datetime
+                  descending: true
