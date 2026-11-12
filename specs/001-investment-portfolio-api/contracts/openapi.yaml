@@ -1,0 +1,651 @@
+openapi: 3.1.0
+
+info:
+  title: Portfolio API
+  version: 1.0.0
+  description: |
+    API REST para administrar un portfolio de inversiones: consulta de instrumentos,
+    creación de órdenes de compra y venta, transferencias de efectivo, historial de
+    órdenes, cancelación de órdenes pendientes y consulta del portfolio.
+
+    ## Identificación de cuenta
+    Todo endpoint que opera sobre una cuenta requiere la cabecera `X-AccountNumber`.
+    - Ausente → `400 Bad Request`
+    - Cuenta inexistente → `404 Not Found`
+
+    ## Idempotencia
+    `POST /api/v1/orders` requiere la cabecera `Idempotency-Key`. Reintentar con la misma
+    clave y el mismo contenido devuelve el resultado original (`201 Created`, mismo `id`).
+    Reintentar con la misma clave y contenido distinto devuelve `409 Conflict`.
+
+    ## Rechazos de negocio
+    Un rechazo por regla de negocio (saldo insuficiente, acciones insuficientes, importe
+    insuficiente, ausencia de cotización) **no es un error HTTP**: la orden se persiste con
+    `status: REJECTED` y `rejectionReason`, y la respuesta es `201 Created`.
+
+    ## Convenciones
+    - Fechas en UTC, ISO-8601 sin zona horaria ni sufijo `Z` (`2026-11-12T04:30:00`).
+    - Importes y precios con 2 decimales. Cantidades de acciones enteras.
+    - El efectivo se expresa en pesos argentinos (ARS).
+  contact:
+    name: Portfolio API
+servers:
+  - url: http://localhost:8080
+    description: Local (docker compose)
+
+tags:
+  - name: Instruments
+    description: Catálogo de instrumentos financieros
+  - name: Orders
+    description: Creación, consulta y cancelación de órdenes
+  - name: Portfolio
+    description: Estado patrimonial de la cuenta
+
+paths:
+  /api/v1/instruments:
+    get:
+      tags: [Instruments]
+      summary: Consultar instrumentos disponibles
+      description: |
+        Devuelve el catálogo completo de instrumentos o, si se indica `query`, los que
+        coinciden parcialmente por ticker y/o nombre (sin distinguir mayúsculas de minúsculas).
+        Los resultados no contienen duplicados. El instrumento de efectivo `ARS` (tipo `MONEDA`)
+        aparece en el listado.
+      parameters:
+        - name: query
+          in: query
+          required: false
+          description: Texto de búsqueda parcial sobre ticker y/o nombre.
+          schema:
+            type: string
+            minLength: 1
+          example: YPF
+      responses:
+        '200':
+          description: Catálogo (o resultado de la búsqueda)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Instrument'
+              example:
+                - id: 65
+                  ticker: YPFD
+                  name: Y.P.F. S.A.
+                  type: ACCIONES
+                - id: 66
+                  ticker: ARS
+                  name: Peso argentino
+                  type: MONEDA
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/orders:
+    post:
+      tags: [Orders]
+      summary: Crear una orden o una transferencia de efectivo
+      description: |
+        Crea una orden de compra (`BUY`), venta (`SELL`), ingreso de efectivo (`CASH_IN`)
+        o retiro de efectivo (`CASH_OUT`).
+
+        **Cantidad o importe**: el request debe contener exactamente uno de `size` o `amount`.
+        - `size` es obligatorio para transferencias y representa el importe en pesos.
+        - Para compras y ventas, `size` es la cantidad de acciones (entera y positiva) y
+          `amount` es el importe a asignar; en ese caso el sistema calcula la cantidad
+          máxima de acciones enteras cuyo valor no supere el importe, y el sobrante queda
+          disponible en la cuenta.
+
+        **Precio**: `MARKET` no admite precio (se usa el último cierre disponible);
+        `LIMIT` lo exige y debe ser mayor que cero. Las transferencias son siempre `MARKET`
+        y no guardan precio.
+
+        **Resultado**: `201 Created` tanto si la orden queda `FILLED`, `NEW` o `REJECTED`.
+      parameters:
+        - name: X-AccountNumber
+          in: header
+          required: true
+          description: Número de cuenta de la cuenta que opera.
+          schema:
+            type: string
+            maxLength: 50
+          example: '10001'
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: Clave única por cuenta. Repetir la misma clave con el mismo contenido devuelve el resultado original.
+          schema:
+            type: string
+            maxLength: 255
+          example: 5f0c8b6a-1c2d-4a3b-9e8f-7a6b5c4d3e2f
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+            examples:
+              compraMarket:
+                summary: Compra a precio de mercado
+                value: { ticker: YPFD, side: BUY, type: MARKET, size: 10 }
+              compraLimit:
+                summary: Compra con precio límite
+                value: { ticker: YPFD, side: BUY, type: LIMIT, size: 10, price: 25000.00 }
+              compraPorImporte:
+                summary: Compra indicando el importe a asignar
+                value: { ticker: YPFD, side: BUY, type: MARKET, amount: 100000.00 }
+              ventaMarket:
+                summary: Venta a precio de mercado
+                value: { ticker: YPFD, side: SELL, type: MARKET, size: 5 }
+              ingresoEfectivo:
+                summary: Ingreso de efectivo
+                value: { ticker: ARS, side: CASH_IN, type: MARKET, size: 100000.00 }
+              retiroEfectivo:
+                summary: Retiro de efectivo
+                value: { ticker: ARS, side: CASH_OUT, type: MARKET, size: 25000.00 }
+      responses:
+        '201':
+          description: |
+            Orden creada. Puede estar `FILLED` (ejecutada), `NEW` (límite pendiente) o
+            `REJECTED` (rechazo por regla de negocio, con `rejectionReason`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+              examples:
+                filled:
+                  value:
+                    id: 1001
+                    ticker: YPFD
+                    side: BUY
+                    type: MARKET
+                    size: 10.00
+                    price: 25000.00
+                    status: FILLED
+                    rejectionReason: null
+                    datetime: '2026-11-12T04:30:00'
+                rejected:
+                  value:
+                    id: 1002
+                    ticker: YPFD
+                    side: BUY
+                    type: MARKET
+                    size: 10.00
+                    price: 25000.00
+                    status: REJECTED
+                    rejectionReason: Insufficient available cash balance
+                    datetime: '2026-11-12T04:31:00'
+                pending:
+                  value:
+                    id: 1003
+                    ticker: YPFD
+                    side: BUY
+                    type: LIMIT
+                    size: 10.00
+                    price: 25000.00
+                    status: NEW
+                    rejectionReason: null
+                    datetime: '2026-11-12T04:32:00'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+    get:
+      tags: [Orders]
+      summary: Consultar el historial de órdenes de la cuenta
+      description: |
+        Devuelve todas las órdenes de la cuenta, en todos los estados (`NEW`, `FILLED`,
+        `REJECTED`, `CANCELLED`), ordenadas de la más reciente a la más antigua. Admite
+        paginación y filtros combinables por estado, lado e instrumento.
+      parameters:
+        - name: X-AccountNumber
+          in: header
+          required: true
+          description: Número de cuenta de la cuenta que consulta.
+          schema:
+            type: string
+            maxLength: 50
+          example: '10001'
+        - name: page
+          in: query
+          required: false
+          description: Página solicitada (base 0).
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          required: false
+          description: Cantidad de elementos por página.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: status
+          in: query
+          required: false
+          description: Filtra por estado de la orden.
+          schema:
+            $ref: '#/components/schemas/OrderStatus'
+        - name: side
+          in: query
+          required: false
+          description: Filtra por lado de la operación.
+          schema:
+            $ref: '#/components/schemas/OrderSide'
+        - name: ticker
+          in: query
+          required: false
+          description: Filtra por ticker del instrumento (coincidencia exacta).
+          schema:
+            type: string
+            maxLength: 20
+          example: YPFD
+      responses:
+        '200':
+          description: Página de órdenes de la cuenta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/orders/{orderId}:
+    delete:
+      tags: [Orders]
+      summary: Cancelar una orden pendiente
+      description: |
+        Cancela una orden en estado `NEW` y libera los recursos que tenía reservados
+        (efectivo o acciones). Solo las órdenes `NEW` son cancelables: las `FILLED`,
+        `REJECTED` y `CANCELLED` devuelven `409 Conflict`. Una orden inexistente o
+        perteneciente a otra cuenta devuelve `404 Not Found` sin revelar su existencia.
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          description: Identificador de la orden.
+          schema:
+            type: integer
+            format: int64
+          example: 1003
+        - name: X-AccountNumber
+          in: header
+          required: true
+          description: Número de cuenta de la cuenta que cancela.
+          schema:
+            type: string
+            maxLength: 50
+          example: '10001'
+      responses:
+        '200':
+          description: Orden cancelada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+              example:
+                id: 1003
+                ticker: YPFD
+                side: BUY
+                type: LIMIT
+                size: 10.00
+                price: 25000.00
+                status: CANCELLED
+                rejectionReason: null
+                datetime: '2026-11-12T04:32:00'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/portfolio:
+    get:
+      tags: [Portfolio]
+      summary: Consultar el estado patrimonial de la cuenta
+      description: |
+        Devuelve el efectivo total, disponible y reservado; las posiciones con su cantidad
+        total, disponible y reservada, precio actual, valor de mercado, costo promedio y
+        rendimientos; y el valor total del portfolio.
+
+        Las órdenes pendientes no alteran el patrimonio total ni las cantidades totales:
+        solo reducen la disponibilidad. Los rendimientos cuyo cálculo carezca de datos
+        válidos (sin costo de adquisición, sin cierre anterior) se devuelven como `null`.
+      parameters:
+        - name: X-AccountNumber
+          in: header
+          required: true
+          description: Número de cuenta de la cuenta que consulta.
+          schema:
+            type: string
+            maxLength: 50
+          example: '10001'
+      responses:
+        '200':
+          description: Portfolio de la cuenta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Portfolio'
+              examples:
+                vacio:
+                  summary: Cuenta sin operaciones
+                  value:
+                    totalCash: 0.00
+                    availableCash: 0.00
+                    reservedCash: 0.00
+                    totalValue: 0.00
+                    positions: []
+                conPosiciones:
+                  summary: Cuenta con efectivo y posiciones
+                  value:
+                    totalCash: 150000.00
+                    availableCash: 100000.00
+                    reservedCash: 50000.00
+                    totalValue: 400000.00
+                    positions:
+                      - ticker: YPFD
+                        totalQuantity: 10.00
+                        availableQuantity: 10.00
+                        reservedQuantity: 0.00
+                        currentPrice: 25000.00
+                        marketValue: 250000.00
+                        averageCost: 23000.00
+                        totalPerformance: 8.70
+                        dailyPerformance: 1.25
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+
+    OrderSide:
+      type: string
+      enum: [BUY, SELL, CASH_IN, CASH_OUT]
+      description: Lado de la operación.
+
+    OrderType:
+      type: string
+      enum: [MARKET, LIMIT]
+      description: Tipo de orden.
+
+    OrderStatus:
+      type: string
+      enum: [NEW, FILLED, REJECTED, CANCELLED]
+      description: |
+        Estado de la orden.
+        - `NEW` — límite pendiente; reserva recursos.
+        - `FILLED` — ejecutada.
+        - `REJECTED` — rechazada por regla de negocio; `rejectionReason` informa el motivo.
+        - `CANCELLED` — cancelada desde `NEW`; sus reservas fueron liberadas.
+
+    InstrumentType:
+      type: string
+      enum: [ACCIONES, MONEDA]
+      description: Tipo de instrumento. `MONEDA` corresponde al efectivo (`ARS`).
+
+    Instrument:
+      type: object
+      required: [id, ticker, name, type]
+      properties:
+        id:
+          type: integer
+          format: int64
+        ticker:
+          type: string
+          maxLength: 20
+        name:
+          type: string
+          maxLength: 150
+        type:
+          $ref: '#/components/schemas/InstrumentType'
+
+    CreateOrderRequest:
+      type: object
+      required: [ticker, side, type]
+      properties:
+        ticker:
+          type: string
+          minLength: 1
+          maxLength: 20
+          description: Ticker del instrumento. `ARS` para transferencias.
+        side:
+          $ref: '#/components/schemas/OrderSide'
+        type:
+          $ref: '#/components/schemas/OrderType'
+        size:
+          type: number
+          format: double
+          exclusiveMinimum: 0
+          description: |
+            Cantidad de acciones (entera, obligatoria en `BUY`/`SELL`) o importe en pesos
+            (obligatorio en `CASH_IN`/`CASH_OUT`). Mutuamente excluyente con `amount`.
+        amount:
+          type: number
+          format: double
+          exclusiveMinimum: 0
+          description: |
+            Importe a asignar a la operación, solo para `BUY`/`SELL`. El sistema calcula la
+            cantidad máxima de acciones enteras cuyo valor no supere el importe; el sobrante
+            queda disponible. Mutuamente excluyente con `size`.
+        price:
+          type: number
+          format: double
+          exclusiveMinimum: 0
+          description: |
+            Precio límite. Obligatorio para `LIMIT` y prohibido para `MARKET` y para
+            transferencias.
+      oneOf:
+        - required: [size]
+          not:
+            required: [amount]
+        - required: [amount]
+          not:
+            required: [size]
+
+    OrderResponse:
+      type: object
+      required: [id, ticker, side, type, size, status, datetime]
+      properties:
+        id:
+          type: integer
+          format: int64
+        ticker:
+          type: string
+          maxLength: 20
+        side:
+          $ref: '#/components/schemas/OrderSide'
+        type:
+          $ref: '#/components/schemas/OrderType'
+        size:
+          type: number
+          format: double
+          description: Cantidad de acciones o importe de la transferencia.
+        price:
+          type: number
+          format: double
+          nullable: true
+          description: Precio de ejecución o límite. `null` en transferencias.
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        rejectionReason:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: Motivo del rechazo. Presente solo cuando `status` es `REJECTED`.
+        datetime:
+          type: string
+          format: date-time
+          description: Fecha y hora de creación en UTC, ISO-8601 sin zona horaria.
+          example: '2026-11-12T04:30:00'
+
+    OrderPage:
+      type: object
+      required: [content, totalElements, totalPages, page, size]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderResponse'
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          description: Página actual (base 0).
+        size:
+          type: integer
+          description: Tamaño de página.
+
+    Position:
+      type: object
+      required: [ticker, totalQuantity, availableQuantity, reservedQuantity]
+      properties:
+        ticker:
+          type: string
+          maxLength: 20
+        totalQuantity:
+          type: number
+          format: double
+          description: Cantidad total de acciones en la posición.
+        availableQuantity:
+          type: number
+          format: double
+          description: Cantidad total menos las acciones reservadas por ventas pendientes.
+        reservedQuantity:
+          type: number
+          format: double
+          description: Acciones comprometidas por ventas en estado `NEW`.
+        currentPrice:
+          type: number
+          format: double
+          nullable: true
+          description: Último cierre disponible. `null` si el instrumento no tiene cotización.
+        marketValue:
+          type: number
+          format: double
+          description: Cantidad total por el precio actual.
+        averageCost:
+          type: number
+          format: double
+          description: Costo promedio ponderado de adquisición.
+        totalPerformance:
+          type: number
+          format: double
+          nullable: true
+          description: |
+            `((valor actual − costo de adquisición) / costo de adquisición) × 100`.
+            `null` si no hay costo de adquisición válido.
+        dailyPerformance:
+          type: number
+          format: double
+          nullable: true
+          description: |
+            `((cierre actual − cierre anterior) / cierre anterior) × 100`.
+            `null` si no hay cierre anterior válido.
+
+    Portfolio:
+      type: object
+      required: [totalCash, availableCash, reservedCash, totalValue, positions]
+      properties:
+        totalCash:
+          type: number
+          format: double
+          description: Efectivo total de la cuenta, incluidas las reservas.
+        availableCash:
+          type: number
+          format: double
+          description: Efectivo total menos el efectivo reservado por compras pendientes.
+        reservedCash:
+          type: number
+          format: double
+          description: Importe comprometido por compras en estado `NEW`.
+        totalValue:
+          type: number
+          format: double
+          description: Efectivo total más la suma del valor de mercado de las posiciones.
+        positions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Position'
+
+    ErrorResponse:
+      type: object
+      required: [timestamp, status, error, message, path]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Fecha y hora en UTC, ISO-8601 sin zona horaria.
+          example: '2026-11-12T04:30:00'
+        status:
+          type: integer
+          description: Código de estado HTTP.
+          example: 400
+        error:
+          type: string
+          description: Descripción del error.
+          example: Bad Request
+        message:
+          type: string
+          description: Mensaje legible del error.
+          example: Invalid request
+        path:
+          type: string
+          description: Ruta de la solicitud.
+          example: /api/v1/orders
+
+  responses:
+
+    BadRequest:
+      description: Solicitud inválida o error de validación
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: '2026-11-12T04:30:00'
+            status: 400
+            error: Bad Request
+            message: Missing required header 'X-AccountNumber'
+            path: /api/v1/orders
+
+    NotFound:
+      description: Cuenta, instrumento u orden inexistente
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: '2026-11-12T04:30:00'
+            status: 404
+            error: Not Found
+            message: Account not found
+            path: /api/v1/portfolio
+
+    Conflict:
+      description: Conflicto de estado o de idempotencia
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: '2026-11-12T04:30:00'
+            status: 409
+            error: Conflict
+            message: Idempotency key already used with a different request
+            path: /api/v1/orders
