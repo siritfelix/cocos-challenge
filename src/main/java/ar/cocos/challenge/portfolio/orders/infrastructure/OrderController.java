@@ -9,9 +9,14 @@ import ar.cocos.challenge.portfolio.orders.application.OrderPageResponse;
 import ar.cocos.challenge.portfolio.orders.application.OrderResponse;
 import ar.cocos.challenge.portfolio.orders.domain.Order;
 import ar.cocos.challenge.portfolio.shared.domain.InvalidRequestException;
+import ar.cocos.challenge.portfolio.shared.infrastructure.ErrorResponse;
 import ar.cocos.challenge.portfolio.shared.infrastructure.PageRequestValidator;
 import ar.cocos.challenge.portfolio.users.application.AccountResolver;
 import ar.cocos.challenge.portfolio.users.domain.Account;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -84,9 +89,16 @@ public class OrderController {
 	 * @return la orden creada
 	 */
 	@PostMapping
+	@ApiResponses({
+			@ApiResponse(responseCode = "400", description = "Solicitud invalida o error de validacion",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "404", description = "Cuenta o instrumento inexistente",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "409", description = "Conflicto de estado o de idempotencia",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 	public ResponseEntity<OrderResponse> createOrder(
-			@RequestHeader(value = ACCOUNT_HEADER, required = false) String accountNumber,
-			@RequestHeader(value = IDEMPOTENCY_HEADER, required = false) String idempotencyKey,
+			@RequestHeader(value = ACCOUNT_HEADER, required = true) String accountNumber,
+			@RequestHeader(value = IDEMPOTENCY_HEADER, required = true) String idempotencyKey,
 			@Valid @RequestBody CreateOrderRequest request) {
 		if (idempotencyKey == null || idempotencyKey.isBlank()) {
 			throw new InvalidRequestException("Missing required header 'Idempotency-Key'");
@@ -111,8 +123,13 @@ public class OrderController {
 	 * @return la pagina de ordenes de la cuenta
 	 */
 	@GetMapping
+	@ApiResponses({
+			@ApiResponse(responseCode = "400", description = "Solicitud invalida o error de validacion",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "404", description = "Cuenta inexistente",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 	public ResponseEntity<OrderPageResponse> getOrders(
-			@RequestHeader(value = ACCOUNT_HEADER, required = false) String accountNumber,
+			@RequestHeader(value = ACCOUNT_HEADER, required = true) String accountNumber,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "20") int size,
 			@RequestParam(required = false) String status,
@@ -137,8 +154,15 @@ public class OrderController {
 	 * @return la orden cancelada
 	 */
 	@DeleteMapping("/{orderId}")
+	@ApiResponses({
+			@ApiResponse(responseCode = "400", description = "Solicitud invalida o error de validacion",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "404", description = "Orden inexistente o de otra cuenta",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "409", description = "La orden no esta en estado NEW",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 	public ResponseEntity<OrderResponse> cancelOrder(
-			@RequestHeader(value = ACCOUNT_HEADER, required = false) String accountNumber,
+			@RequestHeader(value = ACCOUNT_HEADER, required = true) String accountNumber,
 			@PathVariable("orderId") Long orderId) {
 		Order order = cancelOrderUseCase.cancel(accountNumber, orderId);
 		return ResponseEntity.ok(orderMapper.toResponse(order));

@@ -7,6 +7,7 @@ import ar.cocos.challenge.portfolio.orders.domain.OrderStatus;
 import ar.cocos.challenge.portfolio.shared.domain.AccountNotFoundException;
 import ar.cocos.challenge.portfolio.shared.domain.MissingAccountHeaderException;
 import ar.cocos.challenge.portfolio.shared.domain.ResourceNotFoundException;
+import ar.cocos.challenge.portfolio.shared.infrastructure.LockTimeoutInitializer;
 import ar.cocos.challenge.portfolio.users.domain.Account;
 import ar.cocos.challenge.portfolio.users.domain.AccountRepository;
 import org.springframework.stereotype.Service;
@@ -29,14 +30,18 @@ public class CancelOrderUseCase {
 
 	private final AccountRepository accountRepository;
 	private final OrderRepository orderRepository;
+	private final LockTimeoutInitializer lockTimeoutInitializer;
 
 	/**
 	 * @param accountRepository repositorio de cuentas
 	 * @param orderRepository repositorio de ordenes
+	 * @param lockTimeoutInitializer acotador de la espera por bloqueos
 	 */
-	public CancelOrderUseCase(AccountRepository accountRepository, OrderRepository orderRepository) {
+	public CancelOrderUseCase(AccountRepository accountRepository, OrderRepository orderRepository,
+			LockTimeoutInitializer lockTimeoutInitializer) {
 		this.accountRepository = accountRepository;
 		this.orderRepository = orderRepository;
+		this.lockTimeoutInitializer = lockTimeoutInitializer;
 	}
 
 	/**
@@ -58,6 +63,10 @@ public class CancelOrderUseCase {
 		if (accountNumber == null || accountNumber.isBlank()) {
 			throw new MissingAccountHeaderException("Missing required header 'X-AccountNumber'");
 		}
+
+		// El limite de espera por bloqueos se emite como PRIMERA sentencia de la
+		// transaccion, antes de cualquier lectura (research R-006).
+		lockTimeoutInitializer.apply();
 
 		// El lock de la cuenta serializa las cancelaciones concurrentes de sus
 		// ordenes, igual que las operaciones que consumen recursos

@@ -23,6 +23,7 @@ import ar.cocos.challenge.portfolio.shared.domain.ConflictException;
 import ar.cocos.challenge.portfolio.shared.domain.InvalidRequestException;
 import ar.cocos.challenge.portfolio.shared.domain.MissingAccountHeaderException;
 import ar.cocos.challenge.portfolio.shared.domain.ResourceNotFoundException;
+import ar.cocos.challenge.portfolio.shared.infrastructure.LockTimeoutInitializer;
 import ar.cocos.challenge.portfolio.users.domain.Account;
 import ar.cocos.challenge.portfolio.users.domain.AccountRepository;
 import org.springframework.stereotype.Service;
@@ -59,6 +60,7 @@ public class CreateOrderUseCase {
 	private final OrderPricingPolicy pricingPolicy;
 	private final RequestHasher requestHasher;
 	private final ClockProvider clockProvider;
+	private final LockTimeoutInitializer lockTimeoutInitializer;
 
 	/**
 	 * @param accountRepository repositorio de cuentas
@@ -70,11 +72,13 @@ public class CreateOrderUseCase {
 	 * @param pricingPolicy politica de precios
 	 * @param requestHasher calculadora de la huella del request
 	 * @param clockProvider fuente de la hora UTC
+	 * @param lockTimeoutInitializer acotador de la espera por bloqueos
 	 */
 	public CreateOrderUseCase(AccountRepository accountRepository, InstrumentRepository instrumentRepository,
 			OrderRepository orderRepository, IdempotencyRepository idempotencyRepository,
 			ResourceCalculator resourceCalculator, OrderValidator orderValidator, OrderPricingPolicy pricingPolicy,
-			RequestHasher requestHasher, ClockProvider clockProvider) {
+			RequestHasher requestHasher, ClockProvider clockProvider,
+			LockTimeoutInitializer lockTimeoutInitializer) {
 		this.accountRepository = accountRepository;
 		this.instrumentRepository = instrumentRepository;
 		this.orderRepository = orderRepository;
@@ -84,6 +88,7 @@ public class CreateOrderUseCase {
 		this.pricingPolicy = pricingPolicy;
 		this.requestHasher = requestHasher;
 		this.clockProvider = clockProvider;
+		this.lockTimeoutInitializer = lockTimeoutInitializer;
 	}
 
 	/**
@@ -103,6 +108,11 @@ public class CreateOrderUseCase {
 		if (accountNumber == null || accountNumber.isBlank()) {
 			throw new MissingAccountHeaderException("Missing required header 'X-AccountNumber'");
 		}
+
+		// El limite de espera por bloqueos se emite como PRIMERA sentencia de la
+		// transaccion, antes de cualquier lectura, para acotar la espera del
+		// lock pesimista (research R-006).
+		lockTimeoutInitializer.apply();
 
 		// El lock de la cuenta serializa las operaciones concurrentes. Se toma
 		// ANTES de leer los saldos, para que el agregado incluya las ordenes

@@ -50,7 +50,11 @@ public class OrderRepositoryAdapter implements OrderRepository {
 	@Override
 	@Transactional
 	public Order save(Order order) {
-		OrderEntity saved = jpaOrderRepository.save(toEntity(order));
+		// saveAndFlush fuerza el INSERT de la orden antes de continuar: la clave
+		// de idempotencia referencia la orden por FK, de modo que la fila padre
+		// debe existir en la base antes de insertar la hija (research R-007,
+		// FR-060).
+		OrderEntity saved = jpaOrderRepository.saveAndFlush(toEntity(order));
 		return order.withId(saved.getId());
 	}
 

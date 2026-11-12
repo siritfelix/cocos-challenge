@@ -66,6 +66,20 @@ public class GlobalExceptionHandler {
 	}
 
 	/**
+	 * Traduce la ausencia de una cabecera obligatoria declarada en el
+	 * controller, como {@code X-AccountNumber} o {@code Idempotency-Key}.
+	 *
+	 * @param exception error de resolucion de la cabecera
+	 * @param request solicitud que fallo
+	 * @return respuesta {@code 400 Bad Request}
+	 */
+	@ExceptionHandler(org.springframework.web.bind.MissingRequestHeaderException.class)
+	public ResponseEntity<ErrorResponse> handleMissingRequestHeader(
+			org.springframework.web.bind.MissingRequestHeaderException exception, HttpServletRequest request) {
+		return build(HttpStatus.BAD_REQUEST, exception.getMessage(), request, List.of());
+	}
+
+	/**
 	 * Traduce una cuenta inexistente.
 	 *
 	 * @param exception error de dominio

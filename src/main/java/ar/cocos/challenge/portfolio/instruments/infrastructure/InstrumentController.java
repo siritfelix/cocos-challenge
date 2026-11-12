@@ -5,6 +5,11 @@ import java.util.List;
 import ar.cocos.challenge.portfolio.instruments.application.InstrumentQueryUseCase;
 import ar.cocos.challenge.portfolio.instruments.application.InstrumentResponse;
 import ar.cocos.challenge.portfolio.instruments.domain.Instrument;
+import ar.cocos.challenge.portfolio.shared.infrastructure.ErrorResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,6 +46,8 @@ public class InstrumentController {
 	 * @return el catalogo o los instrumentos que coinciden
 	 */
 	@GetMapping
+	@ApiResponses(@ApiResponse(responseCode = "400", description = "Solicitud invalida o error de validacion",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))))
 	public ResponseEntity<List<InstrumentResponse>> getInstruments(
 			@RequestParam(required = false) String query) {
 		List<Instrument> instruments = instrumentQueryUseCase.query(query);

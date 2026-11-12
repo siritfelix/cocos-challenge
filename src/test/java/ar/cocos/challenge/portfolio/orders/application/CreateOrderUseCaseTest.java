@@ -86,7 +86,8 @@ class CreateOrderUseCaseTest {
 
 		createOrderUseCase = new CreateOrderUseCase(accountRepository, instrumentRepository, orderRepository,
 				idempotencyRepository, resourceCalculator, orderValidator, pricingPolicy, new RequestHasher(),
-				clockProvider);
+				clockProvider, org.mockito.Mockito.mock(
+						ar.cocos.challenge.portfolio.shared.infrastructure.LockTimeoutInitializer.class));
 
 		given(clockProvider.now()).willReturn(NOW);
 		given(accountRepository.findByAccountNumberForUpdate(ACCOUNT_NUMBER)).willReturn(Optional.of(account));

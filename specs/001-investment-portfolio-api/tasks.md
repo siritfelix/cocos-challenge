@@ -306,17 +306,17 @@ FR-095, SC-008)
 
 ### Tests for Concurrency ⚠️
 
-- [ ] T123 [P] [US1] Test de concurrencia de compras en `src/test/java/ar/cocos/challenge/portfolio/concurrency/ConcurrentBuyIT.java` — dos compras simultáneas que compiten por el mismo saldo: como máximo una se acepta, el efectivo disponible nunca queda negativo, la suma de las aceptadas no excede el saldo inicial
-- [ ] T124 [P] [US1] Test de concurrencia de ventas en `src/test/java/ar/cocos/challenge/portfolio/concurrency/ConcurrentSellIT.java` — dos ventas simultáneas que compiten por las mismas acciones: como máximo una se acepta, la cantidad de acciones nunca queda negativa
-- [ ] T125 [P] [US1] Test de concurrencia de idempotencia en `src/test/java/ar/cocos/challenge/portfolio/concurrency/ConcurrentIdempotencyIT.java` — dos peticiones simultáneas con la misma `Idempotency-Key` producen una sola orden
-- [ ] T126 [P] [US6] Test de concurrencia de cancelación en `src/test/java/ar/cocos/challenge/portfolio/concurrency/ConcurrentCancelIT.java` — dos cancelaciones simultáneas de la misma orden `NEW` producen una sola cancelación efectiva y una sola respuesta `409`
-- [ ] T127 [P] [US2] Test de rollback en `src/test/java/ar/cocos/challenge/portfolio/concurrency/OrderRollbackIT.java` — una falla tras insertar la orden deja sin persistir tanto la orden como su clave de idempotencia (FR-060)
+- [X] T123 [P] [US1] Test de concurrencia de compras en `src/test/java/ar/cocos/challenge/portfolio/concurrency/ConcurrentBuyIT.java` — dos compras simultáneas que compiten por el mismo saldo: como máximo una se acepta, el efectivo disponible nunca queda negativo, la suma de las aceptadas no excede el saldo inicial
+- [X] T124 [P] [US1] Test de concurrencia de ventas en `src/test/java/ar/cocos/challenge/portfolio/concurrency/ConcurrentSellIT.java` — dos ventas simultáneas que compiten por las mismas acciones: como máximo una se acepta, la cantidad de acciones nunca queda negativa
+- [X] T125 [P] [US1] Test de concurrencia de idempotencia en `src/test/java/ar/cocos/challenge/portfolio/concurrency/ConcurrentIdempotencyIT.java` — dos peticiones simultáneas con la misma `Idempotency-Key` producen una sola orden
+- [X] T126 [P] [US6] Test de concurrencia de cancelación en `src/test/java/ar/cocos/challenge/portfolio/concurrency/ConcurrentCancelIT.java` — dos cancelaciones simultáneas de la misma orden `NEW` producen una sola cancelación efectiva y una sola respuesta `409`
+- [X] T127 [P] [US2] Test de rollback en `src/test/java/ar/cocos/challenge/portfolio/concurrency/OrderRollbackIT.java` — una falla tras insertar la orden deja sin persistir tanto la orden como su clave de idempotencia (FR-060)
 
 ### Implementation for Concurrency
 
-- [ ] T128 [P] [US1] Verificar en `src/main/java/ar/cocos/challenge/portfolio/orders/application/CreateOrderUseCase.java` que el lock pesimista de la cuenta se adquiere ANTES de leer los agregados de recursos y que la transacción es `REQUIRED` (research R-004, R-007)
-- [ ] T129 [P] [US1] Verificar en `src/main/java/ar/cocos/challenge/portfolio/shared/infrastructure/LockTimeoutInitializer.java` que el `SET LOCAL lock_timeout` se emite como primera sentencia de la transacción (research R-006)
-- [ ] T130 [P] [US1] Verificar en `src/main/java/ar/cocos/challenge/portfolio/orders/application/CreateOrderUseCase.java` que la orden se persiste con `saveAndFlush` ANTES de insertar la clave de idempotencia, por el orden de la FK (research R-007)
+- [X] T128 [P] [US1] Verificar en `src/main/java/ar/cocos/challenge/portfolio/orders/application/CreateOrderUseCase.java` que el lock pesimista de la cuenta se adquiere ANTES de leer los agregados de recursos y que la transacción es `REQUIRED` (research R-004, R-007)
+- [X] T129 [P] [US1] Verificar en `src/main/java/ar/cocos/challenge/portfolio/shared/infrastructure/LockTimeoutInitializer.java` que el `SET LOCAL lock_timeout` se emite como primera sentencia de la transacción (research R-006)
+- [X] T130 [P] [US1] Verificar en `src/main/java/ar/cocos/challenge/portfolio/orders/application/CreateOrderUseCase.java` que la orden se persiste con `saveAndFlush` ANTES de insertar la clave de idempotencia, por el orden de la FK (research R-007)
 
 ---
 
@@ -324,13 +324,13 @@ FR-095, SC-008)
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T131 [P] Actualizar `README.md` con instrucciones de ejecución, decisiones de diseño, supuestos y una colección de requests de ejemplo — Principio VII
-- [ ] T132 [P] Verificar que el OpenAPI generado en runtime coincide con `specs/001-investment-portfolio-api/contracts/openapi.yaml` — Principio VI
-- [ ] T133 [P] Agregar `src/test/resources/application-test.yaml` con el perfil de tests y la configuración de `spring.liquibase` para el contenedor
-- [ ] T134 [P] Agregar pruebas de documentación de la API en `src/test/java/ar/cocos/challenge/portfolio/contracts/OpenApiContractIT.java` — verifica que los 4 paths, los headers requeridos y la estructura de error unificada están publicados
-- [ ] T135 Ejecutar la validación completa de `specs/001-investment-portfolio-api/quickstart.md` contra la aplicación en marcha y registrar los resultados
-- [ ] T136 Ejecutar `./mvnw verify` y confirmar que compila, que los tests pasan en verde y que el análisis estático no reporta violaciones
-- [ ] T137 [P] Revisar que no queden secretos ni credenciales en el código y que los logs no expongan payloads — Principio VII
+- [X] T131 [P] Actualizar `README.md` con instrucciones de ejecución, decisiones de diseño, supuestos y una colección de requests de ejemplo — Principio VII
+- [X] T132 [P] Verificar que el OpenAPI generado en runtime coincide con `specs/001-investment-portfolio-api/contracts/openapi.yaml` — Principio VI
+- [X] T133 [P] Agregar `src/test/resources/application-test.yaml` con el perfil de tests y la configuración de `spring.liquibase` para el contenedor
+- [X] T134 [P] Agregar pruebas de documentación de la API en `src/test/java/ar/cocos/challenge/portfolio/contracts/OpenApiContractIT.java` — verifica que los 4 paths, los headers requeridos y la estructura de error unificada están publicados
+- [X] T135 Ejecutar la validación completa de `specs/001-investment-portfolio-api/quickstart.md` contra la aplicación en marcha y registrar los resultados
+- [X] T136 Ejecutar `./mvnw verify` y confirmar que compila, que los tests pasan en verde y que el análisis estático no reporta violaciones
+- [X] T137 [P] Revisar que no queden secretos ni credenciales en el código y que los logs no expongan payloads — Principio VII
 
 ---
 
