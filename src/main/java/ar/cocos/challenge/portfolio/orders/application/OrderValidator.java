@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import ar.cocos.challenge.portfolio.instruments.domain.Instrument;
 import ar.cocos.challenge.portfolio.orders.domain.OrderSide;
 import ar.cocos.challenge.portfolio.orders.domain.OrderType;
+import ar.cocos.challenge.portfolio.orders.domain.TransferPolicy;
 import ar.cocos.challenge.portfolio.shared.domain.InvalidRequestException;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,12 @@ public class OrderValidator {
 
 	/**
 	 * Valida la forma del request segun el lado y el tipo de la operacion.
+	 *
+	 * <p>Las reglas que dependen del instrumento (que la operacion sea
+	 * compatible con el tipo de instrumento) se validan despues de resolverlo,
+	 * en el caso de uso, mediante
+	 * {@link ar.cocos.challenge.portfolio.orders.domain.TransferPolicy} y
+	 * {@link #validateInstrument(CreateOrderRequest, Instrument)}.</p>
 	 *
 	 * @param request solicitud de creacion de orden
 	 * @throws InvalidRequestException si la solicitud infringe alguna regla
@@ -38,9 +45,6 @@ public class OrderValidator {
 		if (!hasSize && !hasAmount) {
 			throw new InvalidRequestException("Either 'size' or 'amount' must be provided");
 		}
-		if (request.getSide().isTransfer() && hasAmount) {
-			throw new InvalidRequestException("Cash transfers must use 'size' to express the amount");
-		}
 	}
 
 	private void validatePrice(CreateOrderRequest request) {
@@ -48,6 +52,7 @@ public class OrderValidator {
 		OrderType type = request.getType();
 
 		if (side.isTransfer()) {
+			// Las transferencias no admiten precio y su tipo es siempre MARKET.
 			if (type != OrderType.MARKET) {
 				throw new InvalidRequestException("Cash transfers must be of type MARKET");
 			}
@@ -99,10 +104,9 @@ public class OrderValidator {
 	 */
 	public void validateInstrument(CreateOrderRequest request, Instrument instrument) {
 		if (request.getSide().isTransfer()) {
-			if (!instrument.isCash()) {
-				throw new InvalidRequestException(
-						"Cash transfers must use the '" + Instrument.CASH_TICKER + "' instrument");
-			}
+			// Las transferencias tienen su propio conjunto de reglas de dominio.
+			TransferPolicy.validate(instrument, request.getType(), request.getPrice(), request.getSize(),
+					request.getAmount());
 			return;
 		}
 		if (instrument.isCash()) {

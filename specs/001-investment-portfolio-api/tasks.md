@@ -178,16 +178,16 @@ también queda `REJECTED`.
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T081 [P] [US2] Test unitario de la validación de transferencias en `src/test/java/ar/cocos/challenge/portfolio/orders/domain/TransferPolicyTest.java` — transferencia exige ticker `ARS`, tipo `MARKET`, sin precio, importe positivo, sin campo `amount`
-- [ ] T082 [P] [US2] Test de contrato de transferencias en `src/test/java/ar/cocos/challenge/portfolio/orders/infrastructure/CashTransferContractIT.java` — `CASH_IN` devuelve `201` con `FILLED` y `price` null, `CASH_OUT` suficiente devuelve `201` con `FILLED`, `CASH_OUT` insuficiente devuelve `201` con `REJECTED` y motivo, transferencia con `amount` devuelve `400`, transferencia con `price` devuelve `400`, transferencia con tipo `LIMIT` devuelve `400`
-- [ ] T083 [P] [US2] Test de contrato de recursos en `src/test/java/ar/cocos/challenge/portfolio/orders/infrastructure/CashTransferResourceIT.java` — el efectivo total aumenta exactamente con el `CASH_IN`, el `CASH_OUT` consume efectivo disponible, un `CASH_OUT` que excede el saldo total pero no el disponible (por una reserva `BUY NEW`) queda `REJECTED`
+- [X] T081 [P] [US2] Test unitario de la validación de transferencias en `src/test/java/ar/cocos/challenge/portfolio/orders/domain/TransferPolicyTest.java` — transferencia exige ticker `ARS`, tipo `MARKET`, sin precio, importe positivo, sin campo `amount`
+- [X] T082 [P] [US2] Test de contrato de transferencias en `src/test/java/ar/cocos/challenge/portfolio/orders/infrastructure/CashTransferContractIT.java` — `CASH_IN` devuelve `201` con `FILLED` y `price` null, `CASH_OUT` suficiente devuelve `201` con `FILLED`, `CASH_OUT` insuficiente devuelve `201` con `REJECTED` y motivo, transferencia con `amount` devuelve `400`, transferencia con `price` devuelve `400`, transferencia con tipo `LIMIT` devuelve `400`
+- [X] T083 [P] [US2] Test de contrato de recursos en `src/test/java/ar/cocos/challenge/portfolio/orders/infrastructure/CashTransferResourceIT.java` — el efectivo total aumenta exactamente con el `CASH_IN`, el `CASH_OUT` consume efectivo disponible, un `CASH_OUT` que excede el saldo total pero no el disponible (por una reserva `BUY NEW`) queda `REJECTED`
 
 ### Implementation for User Story 2
 
-- [ ] T084 [P] [US2] Crear `src/main/java/ar/cocos/challenge/portfolio/orders/domain/TransferPolicy.java` — reglas de dominio de las transferencias: ticker `ARS`, tipo `MARKET`, sin precio, importe positivo
-- [ ] T085 [US2] Implementar la rama de transferencia en `src/main/java/ar/cocos/challenge/portfolio/orders/application/CreateOrderUseCase.java` — la transferencia se ejecuta de inmediato, queda `FILLED`, no genera posición y valida el importe contra el efectivo disponible descontadas las reservas `BUY NEW`
-- [ ] T086 [US2] Extender `src/main/java/ar/cocos/challenge/portfolio/orders/application/OrderResponse.java` y el mapeo para que las transferencias devuelvan `price: null` y `size` con el importe en pesos
-- [ ] T087 [US2] Verificar en `src/main/java/ar/cocos/challenge/portfolio/orders/domain/ResourceCalculator.java` que las transferencias (sin precio) se excluyen del cálculo de `size × price` y se cuentan por su importe en `size`
+- [X] T084 [P] [US2] Crear `src/main/java/ar/cocos/challenge/portfolio/orders/domain/TransferPolicy.java` — reglas de dominio de las transferencias: ticker `ARS`, tipo `MARKET`, sin precio, importe positivo
+- [X] T085 [US2] Implementar la rama de transferencia en `src/main/java/ar/cocos/challenge/portfolio/orders/application/CreateOrderUseCase.java` — la transferencia se ejecuta de inmediato, queda `FILLED`, no genera posición y valida el importe contra el efectivo disponible descontadas las reservas `BUY NEW`
+- [X] T086 [US2] Extender `src/main/java/ar/cocos/challenge/portfolio/orders/application/OrderResponse.java` y el mapeo para que las transferencias devuelvan `price: null` y `size` con el importe en pesos
+- [X] T087 [US2] Verificar en `src/main/java/ar/cocos/challenge/portfolio/orders/domain/ResourceCalculator.java` que las transferencias (sin precio) se excluyen del cálculo de `size × price` y se cuentan por su importe en `size`
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
