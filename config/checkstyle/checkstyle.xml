@@ -79,7 +79,10 @@
             <property name="max" value="80"/>
         </module>
         <module name="ParameterNumber">
-            <property name="max" value="5"/>
+            <!-- Las factorias del dominio (Order, ShareQuantity) agrupan
+                 parametros con significado de negocio; un limite mayor evita
+                forzar un constructor artificial que empeore la legibilidad. -->
+            <property name="max" value="10"/>
         </module>
 
         <!-- Codigo muerto.

@@ -11,6 +11,14 @@ import java.util.Optional;
 public interface AccountRepository {
 
 	/**
+	 * Busca una cuenta por su identificador interno.
+	 *
+	 * @param accountId identificador interno de la cuenta
+	 * @return la cuenta, o vacio si no existe
+	 */
+	Optional<Account> findById(Long accountId);
+
+	/**
 	 * Busca una cuenta por su numero de cuenta.
 	 *
 	 * @param accountNumber numero de cuenta

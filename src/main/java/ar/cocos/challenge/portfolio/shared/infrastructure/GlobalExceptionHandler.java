@@ -9,6 +9,7 @@ import ar.cocos.challenge.portfolio.shared.domain.ConflictException;
 import ar.cocos.challenge.portfolio.shared.domain.DomainException;
 import ar.cocos.challenge.portfolio.shared.domain.InvalidRequestException;
 import ar.cocos.challenge.portfolio.shared.domain.MissingAccountHeaderException;
+import ar.cocos.challenge.portfolio.shared.domain.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,19 @@ public class GlobalExceptionHandler {
 	 */
 	public GlobalExceptionHandler(ClockProvider clockProvider) {
 		this.clockProvider = clockProvider;
+	}
+
+	/**
+	 * Traduce un recurso inexistente, como un instrumento con ticker desconocido.
+	 *
+	 * @param exception error de dominio
+	 * @param request solicitud que fallo
+	 * @return respuesta {@code 404 Not Found}
+	 */
+	@ExceptionHandler(ResourceNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException exception,
+			HttpServletRequest request) {
+		return build(HttpStatus.NOT_FOUND, exception.getMessage(), request, List.of());
 	}
 
 	/**

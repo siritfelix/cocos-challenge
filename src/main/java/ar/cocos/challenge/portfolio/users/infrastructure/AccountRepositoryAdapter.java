@@ -28,6 +28,12 @@ public class AccountRepositoryAdapter implements AccountRepository {
 
 	@Override
 	@Transactional(readOnly = true)
+	public Optional<Account> findById(Long accountId) {
+		return jpaAccountRepository.findById(accountId).map(this::toDomain);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
 	public Optional<Account> findByAccountNumber(String accountNumber) {
 		return jpaAccountRepository.findByAccountNumber(accountNumber).map(this::toDomain);
 	}

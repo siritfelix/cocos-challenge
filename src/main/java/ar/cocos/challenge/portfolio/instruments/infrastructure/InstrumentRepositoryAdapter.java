@@ -25,6 +25,12 @@ public class InstrumentRepositoryAdapter implements InstrumentRepository {
 
 	@Override
 	@Transactional(readOnly = true)
+	public Optional<Instrument> findById(Long instrumentId) {
+		return jpaInstrumentRepository.findById(instrumentId).map(this::toDomain);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
 	public Optional<Instrument> findByTicker(String ticker) {
 		return jpaInstrumentRepository.findByTicker(ticker).map(this::toDomain);
 	}

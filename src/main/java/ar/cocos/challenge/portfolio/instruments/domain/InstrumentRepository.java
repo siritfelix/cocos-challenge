@@ -9,6 +9,14 @@ import java.util.Optional;
 public interface InstrumentRepository {
 
 	/**
+	 * Busca un instrumento por su identificador interno.
+	 *
+	 * @param instrumentId identificador interno del instrumento
+	 * @return el instrumento, o vacio si no existe
+	 */
+	Optional<Instrument> findById(Long instrumentId);
+
+	/**
 	 * Busca un instrumento por su ticker.
 	 *
 	 * @param ticker simbolo del instrumento
