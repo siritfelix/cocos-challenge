@@ -278,6 +278,7 @@ build falla ante cualquier violacion.
 
 ```
 specs/001-investment-portfolio-api/   especificacion: tareas, contratos, quickstart
+specs/002-instrument-prices/          mejora con especificacion: tareas, contratos, quickstart
 src/main/java/...                     codigo de produccion (hexagonal)
 src/main/resources/db/changelog/      migraciones Liquibase (esquema + datos de referencia)
 src/test/java/...                     pruebas unitarias, de contrato y de concurrencia
