@@ -1,0 +1,16 @@
+databaseChangeLog:
+  # Changelog maestro. El esquema de la base de datos se gestiona exclusivamente con
+  # Liquibase (Constitucion, Principio IV); `spring.jpa.hibernate.ddl-auto` es `none`.
+  #
+  # Estructura:
+  #   changes/  -> una version por archivo, con un solo changeSet por archivo (id unico).
+  #   data/     -> datos de referencia precargados (usuarios, instrumentos, cotizaciones).
+  #
+  # Todos los changes se declaran con precondiciones y `onFail: MARK_RAN` para que la
+  # ejecucion sea idempotente y repetible (research R-019).
+  - includeAll:
+      path: changes
+      relativeToChangelogFile: true
+  - includeAll:
+      path: data
+      relativeToChangelogFile: true

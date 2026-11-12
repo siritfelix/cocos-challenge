@@ -1,0 +1,339 @@
+databaseChangeLog:
+
+  # ---------------------------------------------------------------------------
+  # users - cuentas habilitadas para operar. La identificacion es por
+  # account_number (cabecera X-AccountNumber). La fila es ademas el mutex de la
+  # cuenta: el bloqueo pesimista se toma sobre ella (research R-004).
+  # ---------------------------------------------------------------------------
+  - changeSet:
+      id: 0001-001-create-users
+      author: portfolio
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          tableExists:
+            tableName: users
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_users
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(150)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_users_email
+              - column:
+                  name: account_number
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_users_account_number
+
+  # ---------------------------------------------------------------------------
+  # instruments - catalogo de instrumentos. type solo admite ACCIONES o MONEDA.
+  # ARS es el instrumento de efectivo y no es operable como compra ni venta.
+  # ---------------------------------------------------------------------------
+  - changeSet:
+      id: 0001-002-create-instruments
+      author: portfolio
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          tableExists:
+            tableName: instruments
+      changes:
+        - createTable:
+            tableName: instruments
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_instruments
+                    nullable: false
+              - column:
+                  name: ticker
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_instruments_ticker
+              - column:
+                  name: name
+                  type: VARCHAR(150)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+
+  # ---------------------------------------------------------------------------
+  # orders - ledger central. size tiene semantica dual: cantidad de acciones en
+  # BUY/SELL, importe en pesos en CASH_IN/CASH_OUT (spec D-045).
+  # ---------------------------------------------------------------------------
+  - changeSet:
+      id: 0001-003-create-orders
+      author: portfolio
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          tableExists:
+            tableName: orders
+      changes:
+        - createTable:
+            tableName: orders
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_orders
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: instrument_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: side
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: size
+                  type: NUMERIC(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: NUMERIC(10,2)
+              - column:
+                  name: type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rejection_reason
+                  type: VARCHAR(500)
+              - column:
+                  name: datetime
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: orders
+            baseColumnNames: user_id
+            constraintName: fk_orders_user
+            referencedTableName: users
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: orders
+            baseColumnNames: instrument_id
+            constraintName: fk_orders_instrument
+            referencedTableName: instruments
+            referencedColumnNames: id
+
+  # ---------------------------------------------------------------------------
+  # marketdata - cotizaciones precargadas. La ultima cotizacion de un
+  # instrumento es la fila con mayor datetime.
+  # ---------------------------------------------------------------------------
+  - changeSet:
+      id: 0001-004-create-marketdata
+      author: portfolio
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          tableExists:
+            tableName: marketdata
+      changes:
+        - createTable:
+            tableName: marketdata
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_marketdata
+                    nullable: false
+              - column:
+                  name: instrument_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: high
+                  type: NUMERIC(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: low
+                  type: NUMERIC(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: open
+                  type: NUMERIC(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: close
+                  type: NUMERIC(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: previous_close
+                  type: NUMERIC(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: datetime
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: marketdata
+            baseColumnNames: instrument_id
+            constraintName: fk_marketdata_instrument
+            referencedTableName: instruments
+            referencedColumnNames: id
+        - addUniqueConstraint:
+            tableName: marketdata
+            columnNames: instrument_id, datetime
+            constraintName: uk_marketdata_instrument_datetime
+
+  # ---------------------------------------------------------------------------
+  # idempotency_keys - garantiza que una misma operacion no se procese mas de
+  # una vez. La clave es unica por cuenta y cada orden tiene como maximo un
+  # registro de idempotencia (spec FR-055, FR-060).
+  # ---------------------------------------------------------------------------
+  - changeSet:
+      id: 0001-005-create-idempotency-keys
+      author: portfolio
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          tableExists:
+            tableName: idempotency_keys
+      changes:
+        - createTable:
+            tableName: idempotency_keys
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_idempotency_keys
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: idempotency_key
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: request_hash
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_idempotency_keys_order_id
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: idempotency_keys
+            baseColumnNames: user_id
+            constraintName: fk_idempotency_keys_user
+            referencedTableName: users
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: idempotency_keys
+            baseColumnNames: order_id
+            constraintName: fk_idempotency_keys_order
+            referencedTableName: orders
+            referencedColumnNames: id
+        - addUniqueConstraint:
+            tableName: idempotency_keys
+            columnNames: user_id, idempotency_key
+            constraintName: uk_idempotency_keys_user_key
+
+  # ---------------------------------------------------------------------------
+  # CHECK constraints.
+  #
+  # Liquibase 5.0.4 Community no incluye el change type `addCheckConstraint`
+  # (verificado contra el jar oficial: solo existen AddColumnChange,
+  # AddForeignKeyConstraintChange, AddUniqueConstraintChange, etc.). Por eso las
+  # restricciones se aplican con SQL nativo, que es el mecanismo soportado.
+  #
+  # Las de enum (side, type, status, instrument type) son consistentes con el
+  # dominio; las de rango garantizan size y price positivos y cotizaciones
+  # coherentes.
+  # ---------------------------------------------------------------------------
+  - changeSet:
+      id: 0001-006-add-check-constraints
+      author: portfolio
+      preConditions:
+        onFail: MARK_RAN
+        # Se aplica solo si la restriccion aun no existe (count = 0).
+        sqlCheck:
+          expectedResult: 0
+          sql: SELECT COUNT(*) FROM information_schema.check_constraints WHERE constraint_name = 'ck_instruments_type'
+      changes:
+        - sql:
+            sql: ALTER TABLE instruments ADD CONSTRAINT ck_instruments_type CHECK (type IN ('ACCIONES','MONEDA'))
+        - sql:
+            sql: ALTER TABLE orders ADD CONSTRAINT ck_orders_side CHECK (side IN ('BUY','SELL','CASH_IN','CASH_OUT'))
+        - sql:
+            sql: ALTER TABLE orders ADD CONSTRAINT ck_orders_type CHECK (type IN ('MARKET','LIMIT'))
+        - sql:
+            sql: ALTER TABLE orders ADD CONSTRAINT ck_orders_status CHECK (status IN ('NEW','FILLED','REJECTED','CANCELLED'))
+        - sql:
+            sql: ALTER TABLE orders ADD CONSTRAINT ck_orders_size_positive CHECK (size > 0)
+        - sql:
+            sql: ALTER TABLE orders ADD CONSTRAINT ck_orders_price_positive CHECK (price IS NULL OR price > 0)
+        - sql:
+            sql: ALTER TABLE marketdata ADD CONSTRAINT ck_marketdata_high_low CHECK (high >= low)
+        - sql:
+            sql: ALTER TABLE marketdata ADD CONSTRAINT ck_marketdata_values_positive CHECK (high > 0 AND low > 0 AND open > 0 AND close > 0 AND previous_close > 0)

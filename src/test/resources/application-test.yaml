@@ -1,0 +1,27 @@
+# Perfil de tests: la conexion la provee Testcontainers via @ServiceConnection,
+# por lo que no se declaran credenciales reales (Principio VII).
+spring:
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+logging:
+  level:
+    root: WARN
+    ar.cocos.challenge.portfolio: INFO
+    org.springframework.test: WARN
+    liquibase: WARN
+
+---
+# Los tests de integracion usan su propia fuente de datos; se desactiva la
+# autoconfiguracion de Testcontainers para que cada test controle su ciclo de vida.
+spring:
+  test:
+    database:
+      replace: none

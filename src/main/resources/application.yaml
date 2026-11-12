@@ -1,3 +1,63 @@
 spring:
   application:
     name: portfolio
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:portfolio}
+    username: ${POSTGRES_USER:portfolio}
+    password: ${POSTGRES_PASSWORD:portfolio}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      # El lock pesimista por cuenta mantiene una transaccion abierta mientras
+      # espera el lock; un pool acotado evita agotar conexiones (research R-006).
+      maximum-pool-size: 20
+      connection-timeout: 10000
+
+  liquibase:
+    enabled: ${LIQUIBASE_ENABLED:true}
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+  jpa:
+    # El esquema es exclusivamente de Liquibase (Principio IV).
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        order_inserts: true
+        order_updates: true
+
+  jackson:
+    # En Jackson 3 el feature migró a DateTimeFeature: la propiedad antigua
+    # `spring.jackson.serialization.write-dates-as-timestamps` ya no existe (research R-011).
+    # Fechas ISO-8601 sin zona horaria, tal como exige FR-046.
+    datatype:
+      datetime:
+        write-dates-as-timestamps: false
+      # Jackson 3 serializa los enums via toString(); se desactiva para exponer el
+      # name() (BUY, SELL, CASH_IN, ...) como define el contrato (research R-014).
+      enum:
+        write-enums-using-to-string: false
+        read-enums-using-to-string: false
+    # Jackson 3 ordena las propiedades alfabeticamente por defecto; se desactiva
+    # para que el JSON respete el orden declarado en los DTOs (research R-014).
+    mapper:
+      sort-properties-alphabetically: false
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    root: INFO
+    ar.cocos.challenge.portfolio: INFO

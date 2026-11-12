@@ -33,18 +33,18 @@ por la sección 18 de la spec (58 escenarios de aceptación). Las tareas de test
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Corregir dependencias del `pom.xml`: reemplazar `org.liquibase:liquibase-core:4.29.2` por `org.springframework.boot:spring-boot-starter-liquibase` (versión gestionada por Boot 4.1.2 = 5.0.4) y eliminar la property `liquibase-core.version` — sin el starter la autoconfiguración de Liquibase no se registra y las migraciones NO se ejecutan (research R-002)
-- [ ] T002 [P] Agregar `org.springframework.boot:spring-boot-starter-validation` al `pom.xml` — `spring-boot-starter-webmvc` no incluye `jakarta.validation` y las anotaciones del Principio II fallarían al compilar (research R-001)
-- [ ] T003 [P] Subir `org.modelmapper:modelmapper` de `3.2.4` a `3.2.8` y actualizar la property `modelmapper.version` en `pom.xml` (research R-003)
-- [ ] T004 [P] Configurar el plugin `maven-checkstyle-plugin` (o `spotless`) en `pom.xml` con reglas de formato y análisis estático ejecutadas en fase `verify` — Principio I
-- [ ] T005 [P] Agregar el plugin `maven-surefire-plugin` y `maven-failsafe-plugin` en `pom.xml` para separar tests unitarios (`*Test`) de tests de integración (`*IT`)
-- [ ] T006 [P] Crear `Dockerfile` multi-stage (build Maven con imagen JDK 21, runtime con imagen JRE 21) exposing el puerto 8080
-- [ ] T007 [P] Crear `docker-compose.yml` con servicios `postgres` (imagen `postgres:16-alpine`, volumen persistente, healthcheck) y `api` (build desde `Dockerfile`, `depends_on: postgres` con `condition: service_healthy`)
-- [ ] T008 [P] Crear `.env.example` con `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` sin valores reales — Principio VII
-- [ ] T009 Crear `src/main/resources/application.yaml` con: `spring.datasource.*` por variable de entorno, `spring.liquibase.change-log: classpath:db/changelog/db.changelog-master.yaml`, `spring.jpa.hibernate.ddl-auto: none`, `spring.jpa.open-in-view: false`, `spring.jackson.datatype.datetime.write-dates-as-timestamps: false`, `spring.jackson.mapper.sort-properties-alphabetically: false`, `spring.jackson.datatype.enum.write-enums-using-to-string: false` — research R-011 y R-014
-- [ ] T010 [P] Crear `src/main/resources/application-local.yaml` (logging detallado, `show-sql` opcional) y `src/main/resources/application-test.yaml` (datasource vía `@ServiceConnection`, `ddl-auto: none`) — perfiles separados, Principio VII
-- [ ] T011 [P] Actualizar `src/test/java/ar/cocos/challenge/portfolio/TestcontainersConfiguration.java` con bean `PostgreSQLContainer` anotado `@ServiceConnection` usando `org.testcontainers.postgresql.PostgreSQLContainer` (línea Testcontainers 2.x) — research R-013
-- [ ] T012 [P] Actualizar `src/test/java/ar/cocos/challenge/portfolio/PortfolioApplicationTests.java` para que use `@SpringBootTest` + `@AutoConfigureMockMvc` (en Boot 4 `@SpringBootTest` ya NO provee MockMvc) — research R-012
+- [X] T001 Corregir dependencias del `pom.xml`: reemplazar `org.liquibase:liquibase-core:4.29.2` por `org.springframework.boot:spring-boot-starter-liquibase` (versión gestionada por Boot 4.1.2 = 5.0.4) y eliminar la property `liquibase-core.version` — sin el starter la autoconfiguración de Liquibase no se registra y las migraciones NO se ejecutan (research R-002)
+- [X] T002 [P] Agregar `org.springframework.boot:spring-boot-starter-validation` al `pom.xml` — `spring-boot-starter-webmvc` no incluye `jakarta.validation` y las anotaciones del Principio II fallarían al compilar (research R-001)
+- [X] T003 [P] Subir `org.modelmapper:modelmapper` de `3.2.4` a `3.2.8` y actualizar la property `modelmapper.version` en `pom.xml` (research R-003)
+- [X] T004 [P] Configurar el plugin `maven-checkstyle-plugin` (o `spotless`) en `pom.xml` con reglas de formato y análisis estático ejecutadas en fase `verify` — Principio I
+- [X] T005 [P] Agregar el plugin `maven-surefire-plugin` y `maven-failsafe-plugin` en `pom.xml` para separar tests unitarios (`*Test`) de tests de integración (`*IT`)
+- [X] T006 [P] Crear `Dockerfile` multi-stage (build Maven con imagen JDK 21, runtime con imagen JRE 21) exposing el puerto 8080
+- [X] T007 [P] Crear `docker-compose.yml` con servicios `postgres` (imagen `postgres:16-alpine`, volumen persistente, healthcheck) y `api` (build desde `Dockerfile`, `depends_on: postgres` con `condition: service_healthy`)
+- [X] T008 [P] Crear `.env.example` con `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` sin valores reales — Principio VII
+- [X] T009 Crear `src/main/resources/application.yaml` con: `spring.datasource.*` por variable de entorno, `spring.liquibase.change-log: classpath:db/changelog/db.changelog-master.yaml`, `spring.jpa.hibernate.ddl-auto: none`, `spring.jpa.open-in-view: false`, `spring.jackson.datatype.datetime.write-dates-as-timestamps: false`, `spring.jackson.mapper.sort-properties-alphabetically: false`, `spring.jackson.datatype.enum.write-enums-using-to-string: false` — research R-011 y R-014
+- [X] T010 [P] Crear `src/main/resources/application-local.yaml` (logging detallado, `show-sql` opcional) y `src/main/resources/application-test.yaml` (datasource vía `@ServiceConnection`, `ddl-auto: none`) — perfiles separados, Principio VII
+- [X] T011 [P] Actualizar `src/test/java/ar/cocos/challenge/portfolio/TestcontainersConfiguration.java` con bean `PostgreSQLContainer` anotado `@ServiceConnection` usando `org.testcontainers.postgresql.PostgreSQLContainer` (línea Testcontainers 2.x) — research R-013
+- [X] T012 [P] Actualizar `src/test/java/ar/cocos/challenge/portfolio/PortfolioApplicationTests.java` para que use `@SpringBootTest` + `@AutoConfigureMockMvc` (en Boot 4 `@SpringBootTest` ya NO provee MockMvc) — research R-012
 
 ---
 
