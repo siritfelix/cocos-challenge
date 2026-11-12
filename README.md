@@ -1,4 +1,4 @@
-# API de Portfolio de Inversiones
+# API de Portfolio de Inversiones / Felix Sirit (siritfelix@gmail.com) / https://github.com/siritfelix/cocos-challenge.git
 
 API REST para gestionar un portfolio de inversiones: transferencias de efectivo,
 compras y ventas de acciones (a mercado y limitadas), consulta del estado
@@ -62,7 +62,7 @@ powershell -ExecutionPolicy Bypass -File tools/verify_cancel_contract.ps1
 
 | Metodo | Ruta | Descripcion | Cabeceras obligatorias |
 |---|---|---|---|
-| `GET` | `/api/v1/instruments` | Catalogo de instrumentos, con filtro `query` opcional | - |
+| `GET` | `/api/v1/instruments` | Catalogo de instrumentos con su ultimo precio y cierre anterior, con filtro `query` opcional | - |
 | `POST` | `/api/v1/orders` | Crea una orden (compra/venta/transferencia) | `X-AccountNumber`, `Idempotency-Key` |
 | `GET` | `/api/v1/orders` | Historial de ordenes paginado y filtrable | `X-AccountNumber` |
 | `DELETE` | `/api/v1/orders/{orderId}` | Cancela una orden pendiente | `X-AccountNumber` |
@@ -78,6 +78,21 @@ Los errores usan una estructura unificada:
   "message": "Missing required header 'X-AccountNumber'",
   "path": "/api/v1/orders"
 }
+```
+
+### Catalogo con precios
+
+`GET /api/v1/instruments` devuelve cada instrumento con su ultimo precio disponible
+(`price`, cierre de la cotizacion mas reciente) y el cierre anterior referenciado por
+esa misma cotizacion (`previousClose`). Los instrumentos sin cotizacion utilizable no
+exponen esos campos (por ejemplo, el efectivo `ARS`):
+
+```json
+[
+  {"id": 65, "ticker": "YPFD", "name": "Y.P.F. S.A.", "type": "ACCIONES",
+   "price": 7837.50, "previousClose": 7975.05},
+  {"id": 66, "ticker": "ARS", "name": "Peso argentino", "type": "MONEDA"}
+]
 ```
 
 ## Requests de ejemplo

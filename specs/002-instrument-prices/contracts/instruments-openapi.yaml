@@ -1,0 +1,105 @@
+# Delta de contrato: precios en la consulta de instrumentos
+
+**Feature**: 002-instrument-prices | **Date**: 2026-11-12
+
+Este documento define el delta del contrato OpenAPI 3.1 de la API: los fragmentos que se
+actualizan respecto de `specs/001-investment-portfolio-api/contracts/openapi.yaml`.
+
+**Secciones reemplazadas**:
+- `paths./api/v1/instruments` (completa)
+- `components.schemas.Instrument` (completa)
+
+Todo el resto del contrato de la feature 001 permanece sin cambios.
+
+Durante la implementación, el delta se integra al contrato principal de la API y se
+verifica con la misma estrategia de `OpenApiContractIT` (runtime vs. contrato, Principio VI).
+
+```yaml
+# openapi: 3.1.0  (delta, no documento completo)
+# ---- paths./api/v1/instruments ----
+paths:
+  /api/v1/instruments:
+    get:
+      tags: [Instruments]
+      summary: Consultar instrumentos disponibles
+      description: |
+        Devuelve el catálogo completo de instrumentos o, si se indica `query`, los que
+        coinciden parcialmente por ticker y/o nombre (sin distinguir mayúsculas de minúsculas).
+        Los resultados no contienen duplicados. El instrumento de efectivo `ARS` (tipo `MONEDA`)
+        aparece en el listado.
+
+        Cada instrumento incluye además su último precio disponible y el precio de cierre
+        anterior obtenidos de su cotización más reciente registrada. Los instrumentos sin
+        cotización utilizable aparecen con esos campos sin valor.
+      parameters:
+        - name: query
+          in: query
+          required: false
+          description: Texto de búsqueda parcial sobre ticker y/o nombre.
+          schema:
+            type: string
+            minLength: 1
+          example: YPF
+      responses:
+        '200':
+          description: Catálogo (o resultado de la búsqueda) con precios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Instrument'
+              example:
+                - id: 65
+                  ticker: YPFD
+                  name: Y.P.F. S.A.
+                  type: ACCIONES
+                  price: 7837.50
+                  previousClose: 7975.05
+                - id: 66
+                  ticker: ARS
+                  name: Peso argentino
+                  type: MONEDA
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+# ---- components.schemas.Instrument (reemplazado) ----
+components:
+  schemas:
+    Instrument:
+      type: object
+      required: [id, ticker, name, type]
+      properties:
+        id:
+          type: integer
+          format: int64
+        ticker:
+          type: string
+          maxLength: 20
+        name:
+          type: string
+          maxLength: 150
+        type:
+          $ref: '#/components/schemas/InstrumentType'
+        price:
+          type: number
+          description: |
+            Último precio disponible del instrumento: el cierre de su cotización más
+            reciente. Ausente cuando el instrumento no tiene cotización utilizable.
+          example: 7837.50
+        previousClose:
+          type: number
+          description: |
+            Precio de cierre anterior referenciado por la cotización más reciente.
+            Ausente cuando no hay cotización utilizable o el cierre anterior no es válido.
+          example: 7975.05
+```
+
+## Notas de compatibilidad
+
+- Los campos `price` y `previousClose` son **opcionales** en el schema (`required` solo exige
+  `id`, `ticker`, `name`, `type`): instrumentos sin cotización responden sin ellos (FR-005).
+- La serialización JSON de la API omite los campos nulos: un consumidor existente no observa
+  campos inesperados ni cambios en los actuales (FR-006).
+- Los códigos de respuesta no cambian: `200` (éxito) y `400` (query vacía), con la misma
+  estructura de error unificada (`ErrorResponse` de la feature 001).

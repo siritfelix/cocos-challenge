@@ -158,6 +158,26 @@ class OpenApiContractIT {
 		}
 	}
 
+	@Test
+	@DisplayName("El schema del catalogo del runtime declara price y previousClose opcionales")
+	void publishesOptionalPriceFields() throws Exception {
+		JsonNode schemas = apiDocs().path("components").path("schemas");
+		JsonNode instrument = schemas.path("InstrumentResponse");
+		JsonNode properties = instrument.path("properties");
+		assertThat(properties.has("price"))
+				.as("el schema del catalogo debe declarar el campo price; schemas publicados: %s; path instruments: %s",
+						iterableFieldNames(schemas), apiDocs().path("paths").path("/api/v1/instruments"))
+				.isTrue();
+		assertThat(properties.has("previousClose"))
+				.as("el schema del catalogo debe declarar el campo previousClose")
+				.isTrue();
+		for (JsonNode required : instrument.path("required")) {
+			assertThat(required.asText())
+					.as("price y previousClose deben ser opcionales: un instrumento sin cotizacion no los expone")
+					.isNotIn("price", "previousClose");
+		}
+	}
+
 	/**
 	 * @return el documento OpenAPI generado en runtime
 	 * @throws Exception si la llamada falla
