@@ -1,4 +1,4 @@
-# API de Portfolio de Inversiones
+# API de Portfolio de Inversiones / Felix Sirit (siritfelix@gmail.com) / https://github.com/siritfelix/cocos-challenge.git
 
 API REST para gestionar un portfolio de inversiones: transferencias de efectivo,
 compras y ventas de acciones (a mercado y limitadas), consulta del estado
