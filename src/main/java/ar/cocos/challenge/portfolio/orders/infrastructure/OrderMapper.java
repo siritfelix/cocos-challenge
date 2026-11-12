@@ -1,8 +1,10 @@
 package ar.cocos.challenge.portfolio.orders.infrastructure;
 
+import ar.cocos.challenge.portfolio.orders.application.OrderPageResponse;
 import ar.cocos.challenge.portfolio.orders.application.OrderResponse;
 import ar.cocos.challenge.portfolio.orders.domain.Order;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 /**
@@ -43,6 +45,23 @@ public class OrderMapper {
 	 */
 	public OrderResponse toResponse(Order order) {
 		return modelMapper.map(order, OrderResponse.class);
+	}
+
+	/**
+	 * Convierte una pagina de ordenes en su DTO de respuesta.
+	 *
+	 * @param page pagina de ordenes del dominio
+	 * @return el DTO de respuesta con el contenido y los metadatos de
+	 *         paginacion
+	 */
+	public OrderPageResponse toPageResponse(Page<Order> page) {
+		OrderPageResponse response = new OrderPageResponse();
+		response.setContent(page.getContent().stream().map(this::toResponse).toList());
+		response.setTotalElements(page.getTotalElements());
+		response.setTotalPages(page.getTotalPages());
+		response.setPage(page.getNumber());
+		response.setSize(page.getSize());
+		return response;
 	}
 
 	private OrderResponse buildResponse(Order order) {

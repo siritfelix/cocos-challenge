@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Optional;
 
 import ar.cocos.challenge.portfolio.orders.domain.OrderSide;
+import ar.cocos.challenge.portfolio.orders.domain.OrderStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -122,6 +125,37 @@ public interface JpaOrderRepository extends JpaRepository<OrderEntity, Long> {
 			    ), 0) <> 0
 			""", nativeQuery = true)
 	List<Long> findInstrumentsWithPosition(@Param("accountId") Long accountId);
+
+	/**
+	 * Devuelve una pagina del historial de ordenes de la cuenta, con los filtros
+	 * opcionales aplicados.
+	 *
+	 * <p>La consulta se restringe SIEMPRE a la cuenta identificada, con
+	 * independencia de los filtros (spec FR-087). El filtro por ticker es una
+	 * coincidencia exacta (spec FR-085).</p>
+	 *
+	 * <p>El desempate por identificador descendente garantiza un orden estable
+	 * entre ordenes con la misma fecha, de modo que la paginacion no repita ni
+	 * omita registros.</p>
+	 *
+	 * @param accountId identificador de la cuenta
+	 * @param status estado por el que filtrar, o {@code null}
+	 * @param side lado por el que filtrar, o {@code null}
+	 * @param ticker ticker exacto por el que filtrar, o {@code null}
+	 * @param pageable paginacion solicitada
+	 * @return la pagina de ordenes
+	 */
+	@Query("""
+			select o from OrderEntity o
+			where o.userId = :accountId
+			  and (:status is null or o.status = :status)
+			  and (:side is null or o.side = :side)
+			  and (:ticker is null or o.instrumentId in (
+			      select i.id from InstrumentEntity i where i.ticker = :ticker))
+			order by o.datetime desc, o.id desc
+			""")
+	Page<OrderEntity> findHistory(@Param("accountId") Long accountId, @Param("status") OrderStatus status,
+			@Param("side") OrderSide side, @Param("ticker") String ticker, Pageable pageable);
 
 	/**
 	 * Devuelve las ordenes ejecutadas de un par (cuenta, instrumento) ordenadas

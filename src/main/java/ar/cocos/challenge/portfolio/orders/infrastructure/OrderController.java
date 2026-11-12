@@ -2,16 +2,26 @@ package ar.cocos.challenge.portfolio.orders.infrastructure;
 
 import ar.cocos.challenge.portfolio.orders.application.CreateOrderRequest;
 import ar.cocos.challenge.portfolio.orders.application.CreateOrderUseCase;
+import ar.cocos.challenge.portfolio.orders.application.OrderFilter;
+import ar.cocos.challenge.portfolio.orders.application.OrderHistoryUseCase;
+import ar.cocos.challenge.portfolio.orders.application.OrderPageResponse;
 import ar.cocos.challenge.portfolio.orders.application.OrderResponse;
 import ar.cocos.challenge.portfolio.orders.domain.Order;
 import ar.cocos.challenge.portfolio.shared.domain.InvalidRequestException;
+import ar.cocos.challenge.portfolio.shared.infrastructure.PageRequestValidator;
+import ar.cocos.challenge.portfolio.users.application.AccountResolver;
+import ar.cocos.challenge.portfolio.users.domain.Account;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -32,15 +42,25 @@ public class OrderController {
 	private static final String IDEMPOTENCY_HEADER = "Idempotency-Key";
 
 	private final CreateOrderUseCase createOrderUseCase;
+	private final OrderHistoryUseCase orderHistoryUseCase;
 	private final OrderMapper orderMapper;
+	private final AccountResolver accountResolver;
+	private final PageRequestValidator pageRequestValidator;
 
 	/**
 	 * @param createOrderUseCase caso de uso de creacion de ordenes
+	 * @param orderHistoryUseCase caso de uso de consulta del historial
 	 * @param orderMapper mapeador entre dominio y DTOs
+	 * @param accountResolver resolutor de la cuenta por su numero
+	 * @param pageRequestValidator validador de la paginacion
 	 */
-	public OrderController(CreateOrderUseCase createOrderUseCase, OrderMapper orderMapper) {
+	public OrderController(CreateOrderUseCase createOrderUseCase, OrderHistoryUseCase orderHistoryUseCase,
+			OrderMapper orderMapper, AccountResolver accountResolver, PageRequestValidator pageRequestValidator) {
 		this.createOrderUseCase = createOrderUseCase;
+		this.orderHistoryUseCase = orderHistoryUseCase;
 		this.orderMapper = orderMapper;
+		this.accountResolver = accountResolver;
+		this.pageRequestValidator = pageRequestValidator;
 	}
 
 	/**
@@ -66,6 +86,36 @@ public class OrderController {
 		}
 		Order order = createOrderUseCase.create(accountNumber, idempotencyKey, request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(orderMapper.toResponse(order));
+	}
+
+	/**
+	 * Devuelve el historial de ordenes de la cuenta.
+	 *
+	 * <p>Incluye todos los estados y se ordena de la orden mas reciente a la mas
+	 * antigua (spec FR-080). Admite paginacion y filtros combinables por
+	 * estado, lado e instrumento (spec FR-081, FR-084).</p>
+	 *
+	 * @param accountNumber numero de cuenta
+	 * @param page pagina solicitada, base 0
+	 * @param size cantidad de elementos por pagina
+	 * @param status estado por el que filtrar, opcional
+	 * @param side lado por el que filtrar, opcional
+	 * @param ticker ticker exacto por el que filtrar, opcional
+	 * @return la pagina de ordenes de la cuenta
+	 */
+	@GetMapping
+	public ResponseEntity<OrderPageResponse> getOrders(
+			@RequestHeader(value = ACCOUNT_HEADER, required = false) String accountNumber,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "20") int size,
+			@RequestParam(required = false) String status,
+			@RequestParam(required = false) String side,
+			@RequestParam(required = false) String ticker) {
+		pageRequestValidator.validate(page, size);
+		Account account = accountResolver.resolve(accountNumber);
+		OrderFilter filter = OrderFilter.of(status, side, ticker);
+		Page<Order> orders = orderHistoryUseCase.query(account.id(), filter, PageRequest.of(page, size));
+		return ResponseEntity.ok(orderMapper.toPageResponse(orders));
 	}
 
 }

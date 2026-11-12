@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 
 /**
  * Puerto de acceso al ledger de ordenes.
@@ -92,6 +95,19 @@ public interface OrderRepository {
 	 * @return los identificadores de los instrumentos con posicion
 	 */
 	List<Long> findInstrumentsWithPosition(Long accountId);
+
+	/**
+	 * Devuelve una pagina del historial de ordenes de la cuenta.
+	 *
+	 * @param accountId identificador de la cuenta
+	 * @param status estado por el que filtrar, o {@code null} para no filtrar
+	 * @param side lado por el que filtrar, o {@code null} para no filtrar
+	 * @param ticker ticker exacto por el que filtrar, o {@code null} para no
+	 *        filtrar
+	 * @param pageable paginacion solicitada
+	 * @return la pagina de ordenes de la cuenta
+	 */
+	Page<Order> findHistory(Long accountId, OrderStatus status, OrderSide side, String ticker, Pageable pageable);
 
 	/**
 	 * Busca la ultima orden de la cuenta para un instrumento, usada para

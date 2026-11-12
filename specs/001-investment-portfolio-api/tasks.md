@@ -259,18 +259,18 @@ instrumento, combinados entre sí; verificar orden descendente por fecha y los c
 
 ### Tests for User Story 5 ⚠️
 
-- [ ] T108 [P] [US5] Test de contrato `GET /api/v1/orders` en `src/test/java/ar/cocos/challenge/portfolio/orders/infrastructure/OrderHistoryContractIT.java` — cuenta sin operaciones devuelve página vacía con totales en cero, devuelve los cuatro estados, orden `datetime DESC`, `content`/`totalElements`/`totalPages`/`page`/`size` presentes, página inexistente devuelve `200` con lista vacía
-- [ ] T109 [P] [US5] Test de filtros en `src/test/java/ar/cocos/challenge/portfolio/orders/infrastructure/OrderHistoryFilterIT.java` — filtro por `status`, por `side`, por `ticker` (coincidencia exacta), filtros combinados, `status` inválido devuelve `400`, `side` inválido devuelve `400`, los filtros nunca devuelven órdenes de otra cuenta
-- [ ] T110 [P] [US5] Test de paginación inválida en `src/test/java/ar/cocos/challenge/portfolio/orders/infrastructure/OrderHistoryPaginationIT.java` — `page=-1` devuelve `400`, `size=0` devuelve `400`, `size=101` devuelve `400`, `size=abc` devuelve `400`, `page=0&size=20` funciona
+- [X] T108 [P] [US5] Test de contrato `GET /api/v1/orders` en `src/test/java/ar/cocos/challenge/portfolio/orders/infrastructure/OrderHistoryContractIT.java` — cuenta sin operaciones devuelve página vacía con totales en cero, devuelve los cuatro estados, orden `datetime DESC`, `content`/`totalElements`/`totalPages`/`page`/`size` presentes, página inexistente devuelve `200` con lista vacía
+- [X] T109 [P] [US5] Test de filtros en `src/test/java/ar/cocos/challenge/portfolio/orders/infrastructure/OrderHistoryFilterIT.java` — filtro por `status`, por `side`, por `ticker` (coincidencia exacta), filtros combinados, `status` inválido devuelve `400`, `side` inválido devuelve `400`, los filtros nunca devuelven órdenes de otra cuenta
+- [X] T110 [P] [US5] Test de paginación inválida en `src/test/java/ar/cocos/challenge/portfolio/orders/infrastructure/OrderHistoryPaginationIT.java` — `page=-1` devuelve `400`, `size=0` devuelve `400`, `size=101` devuelve `400`, `size=abc` devuelve `400`, `page=0&size=20` funciona
 
 ### Implementation for User Story 5
 
-- [ ] T111 [P] [US5] Crear `src/main/java/ar/cocos/challenge/portfolio/orders/application/OrderFilter.java` — value object de los filtros opcionales `status`, `side`, `ticker` con validación de los valores permitidos
-- [ ] T112 [P] [US5] Crear `src/main/java/ar/cocos/challenge/portfolio/orders/application/OrderHistoryUseCase.java` — caso de uso `@Transactional(readOnly = true)` que devuelve la página de órdenes de la cuenta
-- [ ] T113 [P] [US5] Crear `src/main/java/ar/cocos/challenge/portfolio/orders/application/OrderPageResponse.java` — DTO con `content`, `totalElements`, `totalPages`, `page`, `size`
-- [ ] T114 [US5] Extender `src/main/java/ar/cocos/challenge/portfolio/orders/infrastructure/JpaOrderRepository.java` con la consulta paginada y filtrada por cuenta, con orden `datetime DESC` y desempate estable por `id DESC`
-- [ ] T115 [US5] Crear `src/main/java/ar/cocos/challenge/portfolio/orders/infrastructure/OrderController.java` — método `GET /api/v1/orders` con los parámetros `page`, `size`, `status`, `side`, `ticker` y el header `X-AccountNumber`
-- [ ] T116 [US5] Registrar `MethodArgumentTypeMismatchException` en `src/main/java/ar/cocos/challenge/portfolio/shared/infrastructure/GlobalExceptionHandler.java` para mapear a `400` los valores no numéricos de `page`/`size` y los enums inválidos
+- [X] T111 [P] [US5] Crear `src/main/java/ar/cocos/challenge/portfolio/orders/application/OrderFilter.java` — value object de los filtros opcionales `status`, `side`, `ticker` con validación de los valores permitidos
+- [X] T112 [P] [US5] Crear `src/main/java/ar/cocos/challenge/portfolio/orders/application/OrderHistoryUseCase.java` — caso de uso `@Transactional(readOnly = true)` que devuelve la página de órdenes de la cuenta
+- [X] T113 [P] [US5] Crear `src/main/java/ar/cocos/challenge/portfolio/orders/application/OrderPageResponse.java` — DTO con `content`, `totalElements`, `totalPages`, `page`, `size`
+- [X] T114 [US5] Extender `src/main/java/ar/cocos/challenge/portfolio/orders/infrastructure/JpaOrderRepository.java` con la consulta paginada y filtrada por cuenta, con orden `datetime DESC` y desempate estable por `id DESC`
+- [X] T115 [US5] Crear `src/main/java/ar/cocos/challenge/portfolio/orders/infrastructure/OrderController.java` — método `GET /api/v1/orders` con los parámetros `page`, `size`, `status`, `side`, `ticker` y el header `X-AccountNumber`
+- [X] T116 [US5] Registrar `MethodArgumentTypeMismatchException` en `src/main/java/ar/cocos/challenge/portfolio/shared/infrastructure/GlobalExceptionHandler.java` para mapear a `400` los valores no numéricos de `page`/`size` y los enums inválidos
 
 **Checkpoint**: At this point, User Stories 1–5 should all work independently
 

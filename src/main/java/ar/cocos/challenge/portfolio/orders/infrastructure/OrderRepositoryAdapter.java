@@ -2,16 +2,21 @@ package ar.cocos.challenge.portfolio.orders.infrastructure;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import ar.cocos.challenge.portfolio.instruments.domain.Instrument;
 import ar.cocos.challenge.portfolio.instruments.domain.InstrumentRepository;
 import ar.cocos.challenge.portfolio.orders.domain.Order;
 import ar.cocos.challenge.portfolio.orders.domain.OrderRepository;
 import ar.cocos.challenge.portfolio.orders.domain.OrderSide;
+import ar.cocos.challenge.portfolio.orders.domain.OrderStatus;
 import ar.cocos.challenge.portfolio.orders.domain.RejectionReason;
 import ar.cocos.challenge.portfolio.users.domain.Account;
 import ar.cocos.challenge.portfolio.users.domain.AccountRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -108,6 +113,38 @@ public class OrderRepositoryAdapter implements OrderRepository {
 		Instrument instrument = instrumentRepository.findById(instrumentId)
 				.orElseThrow(() -> new IllegalStateException("Instrument not found for orders"));
 		return entities.stream().map(entity -> toDomain(entity, account, instrument)).toList();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Page<Order> findHistory(Long accountId, OrderStatus status, OrderSide side, String ticker,
+			Pageable pageable) {
+		Page<OrderEntity> page = jpaOrderRepository.findHistory(accountId, status, side, ticker, pageable);
+		// La cuenta y el instrumento se resuelven una vez por pagina: todas las
+		// ordenes de la pagina pertenecen a la misma cuenta.
+		Account account = accountRepository.findById(accountId)
+				.orElseThrow(() -> new IllegalStateException("Account not found for orders"));
+		Map<Long, Instrument> instruments = resolveInstruments(page.getContent());
+		return page.map(entity -> toDomain(entity, account, instruments));
+	}
+
+	private Map<Long, Instrument> resolveInstruments(List<OrderEntity> entities) {
+		List<Long> instrumentIds = entities.stream()
+				.map(OrderEntity::getInstrumentId)
+				.distinct()
+				.toList();
+		return instrumentIds.stream()
+				.map(instrumentRepository::findById)
+				.flatMap(Optional::stream)
+				.collect(Collectors.toMap(Instrument::id, instrument -> instrument));
+	}
+
+	private Order toDomain(OrderEntity entity, Account account, Map<Long, Instrument> instruments) {
+		Instrument instrument = instruments.get(entity.getInstrumentId());
+		if (instrument == null) {
+			throw new IllegalStateException("Instrument not found for order");
+		}
+		return toDomain(entity, account, instrument);
 	}
 
 	private OrderEntity toEntity(Order order) {
