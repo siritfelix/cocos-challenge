@@ -10,6 +10,7 @@ import ar.cocos.challenge.portfolio.portfolio.application.ExecutedOrdersPort;
 import ar.cocos.challenge.portfolio.portfolio.domain.CashSummary;
 import ar.cocos.challenge.portfolio.portfolio.domain.ExecutedTrade;
 import ar.cocos.challenge.portfolio.portfolio.domain.InstrumentHolding;
+import ar.cocos.challenge.portfolio.users.domain.Account;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,26 +36,26 @@ public class OrdersReadAdapter implements ExecutedOrdersPort {
 
 	@Override
 	@Transactional(readOnly = true)
-	public CashSummary cashSummary(Long accountId) {
-		BigDecimal totalCash = orderRepository.sumFilledCash(accountId);
-		BigDecimal reservedCash = orderRepository.sumReservedCash(accountId);
+	public CashSummary cashSummary(Account account) {
+		BigDecimal totalCash = orderRepository.sumFilledCash(account.id());
+		BigDecimal reservedCash = orderRepository.sumReservedCash(account.id());
 		return new CashSummary(totalCash, reservedCash, totalCash.subtract(reservedCash));
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<InstrumentHolding> holdings(Long accountId) {
-		return orderRepository.findInstrumentsWithPosition(accountId).stream()
+	public List<InstrumentHolding> holdings(Account account) {
+		return orderRepository.findInstrumentsWithPosition(account.id()).stream()
 				.map(instrumentId -> new InstrumentHolding(instrumentId,
-						orderRepository.sumFilledShares(accountId, instrumentId),
-						orderRepository.sumReservedShares(accountId, instrumentId)))
+						orderRepository.sumFilledShares(account.id(), instrumentId),
+						orderRepository.sumReservedShares(account.id(), instrumentId)))
 				.toList();
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<ExecutedTrade> executedTrades(Long accountId, Long instrumentId) {
-		return orderRepository.findExecutedTradesInChronologicalOrder(accountId, instrumentId).stream()
+	public List<ExecutedTrade> executedTrades(Account account, Long instrumentId) {
+		return orderRepository.findExecutedTradesInChronologicalOrder(account.id(), instrumentId).stream()
 				.map(this::toExecutedTrade)
 				.toList();
 	}
