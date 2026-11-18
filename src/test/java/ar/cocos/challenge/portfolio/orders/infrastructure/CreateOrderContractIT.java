@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.UUID;
 
 import ar.cocos.challenge.portfolio.TestcontainersConfiguration;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
@@ -47,6 +49,15 @@ class CreateOrderContractIT {
 
 	@Autowired
 	private MockMvc mockMvc;
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+
+	@BeforeEach
+	void resetOrders() {
+		jdbcTemplate.update("DELETE FROM idempotency_keys");
+		jdbcTemplate.update("DELETE FROM orders");
+	}
 
 	@Test
 	@DisplayName("Una compra a mercado con recursos suficientes queda FILLED")
@@ -137,7 +148,7 @@ class CreateOrderContractIT {
 	@Test
 	@DisplayName("Una compra por importe calcula la cantidad maxima de acciones")
 	void createsBuyByAmount() throws Exception {
-		fundAccount(FUNDED_ACCOUNT, "50000");
+		fundAccount(FUNDED_ACCOUNT, "500000");
 
 		mockMvc.perform(post("/api/v1/orders")
 				.header("X-AccountNumber", FUNDED_ACCOUNT)
