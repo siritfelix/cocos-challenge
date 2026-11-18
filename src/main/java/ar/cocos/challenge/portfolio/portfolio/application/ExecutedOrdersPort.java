@@ -1,6 +1,7 @@
 package ar.cocos.challenge.portfolio.portfolio.application;
 
 import java.util.List;
+import java.util.Map;
 
 import ar.cocos.challenge.portfolio.portfolio.domain.CashSummary;
 import ar.cocos.challenge.portfolio.portfolio.domain.ExecutedTrade;
@@ -42,5 +43,15 @@ public interface ExecutedOrdersPort {
 	 *         luego por identificador
 	 */
 	List<ExecutedTrade> executedTrades(Account account, Long instrumentId);
+
+	/**
+	 * Devuelve las ordenes ejecutadas por cuenta en orden
+	 * cronologico, que son la entrada del fold del costo promedio.
+	 *
+	 * @param account contexto de la cuenta	 
+	 * @return las ordenes de compra y venta ejecutadas, ordenadas por fecha y
+	 *         luego por identificador
+	 */
+	Map<Long, List<ExecutedTrade>>	executedTradesByAccount(Account account);
 
 }

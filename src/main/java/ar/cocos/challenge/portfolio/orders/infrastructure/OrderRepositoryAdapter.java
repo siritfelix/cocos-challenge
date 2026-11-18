@@ -160,6 +160,17 @@ public class OrderRepositoryAdapter implements OrderRepository {
 		return order;
 	}
 
+	@Override
+	public List<Order> findExecutedTradesInChronologicalOrder(Account account) {
+		List<OrderEntity> entities = jpaOrderRepository.findExecutedTradesInChronologicalOrder(account.id(),
+				TRADE_SIDES);
+		if (entities.isEmpty()) {
+			return List.of();
+		}
+
+		return entities.stream().map(entity -> toDomain(entity, account, entity.getInstrumentId())).toList();
+	}
+
 	private OrderEntity toEntity(Order order) {
 		OrderEntity entity = new OrderEntity();
 		entity.setUserId(order.getAccount().id());
@@ -185,6 +196,13 @@ public class OrderRepositoryAdapter implements OrderRepository {
 
 	private Order toDomain(OrderEntity entity, Account account, Instrument instrument) {
 		return Order.reconstituted(entity.getId(), account, instrument, entity.getSide(), entity.getSize(),
+				entity.getPrice(), entity.getType(), entity.getStatus(), toRejectionReason(entity.getRejectionReason()),
+				entity.getDatetime());
+	}
+
+	private Order toDomain(OrderEntity entity, Account account, Long instrumentId) {
+		return Order.reconstituted(entity.getId(), account, new Instrument(instrumentId, null, null, null),
+				entity.getSide(), entity.getSize(),
 				entity.getPrice(), entity.getType(), entity.getStatus(), toRejectionReason(entity.getRejectionReason()),
 				entity.getDatetime());
 	}

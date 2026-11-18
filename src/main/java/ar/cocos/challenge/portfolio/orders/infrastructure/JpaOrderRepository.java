@@ -200,4 +200,28 @@ public interface JpaOrderRepository extends JpaRepository<OrderEntity, Long> {
 	List<OrderEntity> findExecutedTradesInChronologicalOrder(@Param("accountId") Long accountId,
 			@Param("instrumentId") Long instrumentId, @Param("sides") List<OrderSide> sides);
 
+	/**
+	 * Devuelve las ordenes ejecutadas de un par (cuenta, instrumento) ordenadas
+	 * de forma cronologica.
+	 *
+	 * <p>
+	 * El desempate por identificador es esencial: el calculo del costo
+	 * promedio ponderado es un fold secuencial y dos lecturas concurrentes
+	 * deben obtener la misma secuencia (research R-009).
+	 * </p>
+	 *
+	 * @param accountId    identificador de la cuenta
+	 * @return las ordenes de compra y venta ejecutadas, ordenadas por fecha y
+	 *         luego por identificador
+	 */
+	@Query("""
+			select o from OrderEntity o
+			where o.userId = :userId			  
+			  and o.status = 'FILLED'
+			  and o.side in :sides
+			order by o.datetime asc, o.id asc
+			""")
+	List<OrderEntity> findExecutedTradesInChronologicalOrder(@Param("userId") Long userId,
+			@Param("sides") List<OrderSide> sides);
+
 }

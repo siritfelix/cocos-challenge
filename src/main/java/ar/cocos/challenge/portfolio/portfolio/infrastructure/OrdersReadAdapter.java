@@ -2,6 +2,9 @@ package ar.cocos.challenge.portfolio.portfolio.infrastructure;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import ar.cocos.challenge.portfolio.orders.domain.Order;
 import ar.cocos.challenge.portfolio.orders.domain.OrderRepository;
@@ -58,6 +61,13 @@ public class OrdersReadAdapter implements ExecutedOrdersPort {
 		return orderRepository.findExecutedTradesInChronologicalOrder(account.id(), instrumentId).stream()
 				.map(this::toExecutedTrade)
 				.toList();
+	}
+
+	@Override
+	public Map<Long, List<ExecutedTrade>> executedTradesByAccount(Account account) {
+		return orderRepository.findExecutedTradesInChronologicalOrder(account).stream()
+				.collect(Collectors.groupingBy(o -> o.getInstrument().id(),
+						Collectors.mapping(this::toExecutedTrade, Collectors.toList())));
 	}
 
 	private ExecutedTrade toExecutedTrade(Order order) {

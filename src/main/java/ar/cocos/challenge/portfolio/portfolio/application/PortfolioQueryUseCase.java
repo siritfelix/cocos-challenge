@@ -3,6 +3,8 @@ package ar.cocos.challenge.portfolio.portfolio.application;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import ar.cocos.challenge.portfolio.instruments.domain.Instrument;
 import ar.cocos.challenge.portfolio.instruments.domain.InstrumentRepository;
@@ -73,24 +75,38 @@ public class PortfolioQueryUseCase {
 
 	private List<Position> buildPositions(Account account) {
 		List<Position> positions = new ArrayList<>();
-		for (InstrumentHolding holding : executedOrdersPort.holdings(account)) {
-			Instrument instrument = instrumentRepository.findById(holding.instrumentId()).orElse(null);
+
+		List<InstrumentHolding> instrumentHoldings = executedOrdersPort.holdings(account);
+
+		List<Long> ids = instrumentHoldings.stream().map(InstrumentHolding::instrumentId).toList();
+
+		Map<Long, Instrument> instruments = instrumentRepository.findAllById(ids).stream()
+				.collect(Collectors.toMap(Instrument::id, i -> i));
+
+		Map<Long, LatestQuote> quotes = marketDataRepository.findLatestByInstrumentIds(ids);
+
+		Map<Long, List<ExecutedTrade>> trades = executedOrdersPort.executedTradesByAccount(account);
+
+		for (InstrumentHolding holding : instrumentHoldings) {
+			Instrument instrument = instruments.getOrDefault(holding.instrumentId(), null);
 			if (instrument == null) {
 				continue;
 			}
-			positions.add(buildPosition(instrument, holding, account));
+			positions.add(buildPosition(instrument, quotes.getOrDefault(instrument.id(), null),
+					trades.getOrDefault(instrument.id(), List.of()), holding));
 		}
+
 		return positions;
 	}
 
-	private Position buildPosition(Instrument instrument, InstrumentHolding holding, Account account) {
+	private Position buildPosition(Instrument instrument, LatestQuote quote, List<ExecutedTrade> executedTrades,
+			InstrumentHolding holding) {
 		BigDecimal totalQuantity = holding.totalQuantity();
-		LatestQuote quote = marketDataRepository.findLatestByInstrumentId(instrument.id()).orElse(null);
+
 		BigDecimal currentPrice = quote == null ? null : quote.close();
 
 		BigDecimal marketValue = currentPrice == null ? BigDecimal.ZERO : totalQuantity.multiply(currentPrice);
 
-		List<ExecutedTrade> executedTrades = executedOrdersPort.executedTrades(account, instrument.id());
 		BigDecimal averageCost = costBasisCalculator.averageCost(executedTrades);
 
 		BigDecimal totalPerformance = performanceCalculator.totalPerformance(marketValue, averageCost, totalQuantity);
