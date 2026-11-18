@@ -3,7 +3,6 @@ package ar.cocos.challenge.portfolio.portfolio.infrastructure;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import ar.cocos.challenge.portfolio.orders.domain.Order;
