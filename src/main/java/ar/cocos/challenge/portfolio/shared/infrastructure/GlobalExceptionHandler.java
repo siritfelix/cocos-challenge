@@ -12,6 +12,7 @@ import ar.cocos.challenge.portfolio.shared.domain.MissingAccountHeaderException;
 import ar.cocos.challenge.portfolio.shared.domain.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -27,6 +28,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
  * <p>Toda respuesta de error adopta la misma estructura (spec seccion 14) y
  * nunca expone trazas ni detalles internos (Principio VI, FR-091).</p>
  */
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -199,6 +201,7 @@ public class GlobalExceptionHandler {
 	 */
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ErrorResponse> handleUnexpected(Exception exception, HttpServletRequest request) {
+		log.error("Unhandled exception on {} {}", request.getMethod(), request.getRequestURI(), exception);
 		return build(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", request, List.of());
 	}
 

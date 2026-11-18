@@ -21,7 +21,6 @@ import ar.cocos.challenge.portfolio.shared.application.ClockProvider;
 import ar.cocos.challenge.portfolio.shared.domain.AccountNotFoundException;
 import ar.cocos.challenge.portfolio.shared.domain.ConflictException;
 import ar.cocos.challenge.portfolio.shared.domain.InvalidRequestException;
-import ar.cocos.challenge.portfolio.shared.domain.MissingAccountHeaderException;
 import ar.cocos.challenge.portfolio.shared.domain.ResourceNotFoundException;
 import ar.cocos.challenge.portfolio.shared.infrastructure.LockTimeoutInitializer;
 import ar.cocos.challenge.portfolio.users.domain.Account;
@@ -35,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>El flujo completo se ejecuta dentro de una unica transaccion:</p>
  * <ol>
  *   <li>Se toma el bloqueo pesimista de la cuenta, que serializa las
- *       operaciones concurrentes de esa cuenta (research R-004).</li>
+ *       operaciones concurrentes de esa cuenta (research R-004).</li>s
  *   <li>Se resuelve la idempotencia: si la clave ya se uso con el mismo
  *       contenido se devuelve el resultado original; con contenido distinto se
  *       responde un conflicto (spec FR-057, FR-058).</li>
@@ -94,20 +93,14 @@ public class CreateOrderUseCase {
 	/**
 	 * Crea una orden o transferencia de efectivo.
 	 *
-	 * @param accountNumber numero de cuenta de la cabecera {@code X-AccountNumber}
+	 * @param account contexto de la cuenta
 	 * @param idempotencyKey clave de idempotencia de la cabecera
 	 * @param request solicitud de creacion
 	 * @return la orden creada, ejecutada, pendiente o rechazada
 	 */
 	@Transactional
-	public Order create(String accountNumber, String idempotencyKey, CreateOrderRequest request) {
+	public Order create(Account account, String idempotencyKey, CreateOrderRequest request) {
 		orderValidator.validate(request);
-
-		// La cabecera de cuenta ausente es un error de solicitud (400), no una
-		// cuenta inexistente (404). Se valida antes de consultar la base.
-		if (accountNumber == null || accountNumber.isBlank()) {
-			throw new MissingAccountHeaderException("Missing required header 'X-AccountNumber'");
-		}
 
 		// El limite de espera por bloqueos se emite como PRIMERA sentencia de la
 		// transaccion, antes de cualquier lectura, para acotar la espera del
@@ -117,10 +110,11 @@ public class CreateOrderUseCase {
 		// El lock de la cuenta serializa las operaciones concurrentes. Se toma
 		// ANTES de leer los saldos, para que el agregado incluya las ordenes
 		// confirmadas por el escritor anterior (research R-004).
-		Account account = accountRepository.findByAccountNumberForUpdate(accountNumber)
-				.orElseThrow(() -> new AccountNotFoundException(accountNumber));
+		Account resolvedAccount = accountRepository.findByAccountNumberForUpdate(account.accountNumber())
+				.orElseThrow(() -> new AccountNotFoundException(account.accountNumber()));
+
 		String requestHash = requestHasher.hash(request);
-		Optional<IdempotencyKey> existingKey = idempotencyRepository.findByAccountIdAndKey(account.id(),
+		Optional<IdempotencyKey> existingKey = idempotencyRepository.findByAccountIdAndKey(resolvedAccount.id(),
 				idempotencyKey);
 		if (existingKey.isPresent()) {
 			return replay(existingKey.get(), requestHash);
@@ -131,10 +125,10 @@ public class CreateOrderUseCase {
 		orderValidator.validateInstrument(request, instrument);
 
 		LocalDateTime now = clockProvider.now();
-		Order order = buildOrder(account, instrument, request, now);
+		Order order = buildOrder(resolvedAccount, instrument, request, now);
 
 		Order persisted = orderRepository.save(order);
-		idempotencyRepository.save(new IdempotencyKey(null, account.id(), idempotencyKey, requestHash,
+		idempotencyRepository.save(new IdempotencyKey(null, resolvedAccount.id(), idempotencyKey, requestHash,
 				persisted.getId(), now));
 		return persisted;
 	}

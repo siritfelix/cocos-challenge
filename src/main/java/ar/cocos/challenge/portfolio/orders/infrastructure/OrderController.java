@@ -11,8 +11,10 @@ import ar.cocos.challenge.portfolio.orders.domain.Order;
 import ar.cocos.challenge.portfolio.shared.domain.InvalidRequestException;
 import ar.cocos.challenge.portfolio.shared.infrastructure.ErrorResponse;
 import ar.cocos.challenge.portfolio.shared.infrastructure.PageRequestValidator;
-import ar.cocos.challenge.portfolio.users.application.AccountResolver;
 import ar.cocos.challenge.portfolio.users.domain.Account;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,11 +42,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderController {
 
 	/**
-	 * Nombre de la cabecera que transporta el numero de cuenta.
-	 */
-	private static final String ACCOUNT_HEADER = "X-AccountNumber";
-
-	/**
 	 * Nombre de la cabecera que transporta la clave de idempotencia.
 	 */
 	private static final String IDEMPOTENCY_HEADER = "Idempotency-Key";
@@ -53,7 +50,6 @@ public class OrderController {
 	private final CancelOrderUseCase cancelOrderUseCase;
 	private final OrderHistoryUseCase orderHistoryUseCase;
 	private final OrderMapper orderMapper;
-	private final AccountResolver accountResolver;
 	private final PageRequestValidator pageRequestValidator;
 
 	/**
@@ -61,17 +57,14 @@ public class OrderController {
 	 * @param cancelOrderUseCase caso de uso de cancelacion de ordenes
 	 * @param orderHistoryUseCase caso de uso de consulta del historial
 	 * @param orderMapper mapeador entre dominio y DTOs
-	 * @param accountResolver resolutor de la cuenta por su numero
 	 * @param pageRequestValidator validador de la paginacion
 	 */
 	public OrderController(CreateOrderUseCase createOrderUseCase, CancelOrderUseCase cancelOrderUseCase,
-			OrderHistoryUseCase orderHistoryUseCase, OrderMapper orderMapper, AccountResolver accountResolver,
-			PageRequestValidator pageRequestValidator) {
+			OrderHistoryUseCase orderHistoryUseCase, OrderMapper orderMapper, PageRequestValidator pageRequestValidator) {
 		this.createOrderUseCase = createOrderUseCase;
 		this.cancelOrderUseCase = cancelOrderUseCase;
 		this.orderHistoryUseCase = orderHistoryUseCase;
 		this.orderMapper = orderMapper;
-		this.accountResolver = accountResolver;
 		this.pageRequestValidator = pageRequestValidator;
 	}
 
@@ -83,12 +76,15 @@ public class OrderController {
 	 * del request no persisten ninguna orden y se traducen a
 	 * {@code 400 Bad Request}.</p>
 	 *
-	 * @param accountNumber numero de cuenta
+	 * @param account contexto de la cuenta
 	 * @param idempotencyKey clave de idempotencia de la solicitud
 	 * @param request solicitud de creacion
 	 * @return la orden creada
 	 */
 	@PostMapping
+	@Parameters({
+			@Parameter(name = "X-AccountNumber", in = ParameterIn.HEADER, required = true,
+					description = "Numero de cuenta", schema = @Schema(type = "string"))})
 	@ApiResponses({
 			@ApiResponse(responseCode = "400", description = "Solicitud invalida o error de validacion",
 					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -97,13 +93,13 @@ public class OrderController {
 			@ApiResponse(responseCode = "409", description = "Conflicto de estado o de idempotencia",
 					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 	public ResponseEntity<OrderResponse> createOrder(
-			@RequestHeader(value = ACCOUNT_HEADER, required = true) String accountNumber,
+			Account account,
 			@RequestHeader(value = IDEMPOTENCY_HEADER, required = true) String idempotencyKey,
 			@Valid @RequestBody CreateOrderRequest request) {
 		if (idempotencyKey == null || idempotencyKey.isBlank()) {
 			throw new InvalidRequestException("Missing required header 'Idempotency-Key'");
 		}
-		Order order = createOrderUseCase.create(accountNumber, idempotencyKey, request);
+		Order order = createOrderUseCase.create(account, idempotencyKey, request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(orderMapper.toResponse(order));
 	}
 
@@ -114,7 +110,7 @@ public class OrderController {
 	 * antigua (spec FR-080). Admite paginacion y filtros combinables por
 	 * estado, lado e instrumento (spec FR-081, FR-084).</p>
 	 *
-	 * @param accountNumber numero de cuenta
+	 * @param account contexto de la cuenta
 	 * @param page pagina solicitada, base 0
 	 * @param size cantidad de elementos por pagina
 	 * @param status estado por el que filtrar, opcional
@@ -123,22 +119,24 @@ public class OrderController {
 	 * @return la pagina de ordenes de la cuenta
 	 */
 	@GetMapping
+	@Parameters({
+			@Parameter(name = "X-AccountNumber", in = ParameterIn.HEADER, required = true,
+					description = "Numero de cuenta", schema = @Schema(type = "string"))})
 	@ApiResponses({
 			@ApiResponse(responseCode = "400", description = "Solicitud invalida o error de validacion",
 					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode = "404", description = "Cuenta inexistente",
 					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 	public ResponseEntity<OrderPageResponse> getOrders(
-			@RequestHeader(value = ACCOUNT_HEADER, required = true) String accountNumber,
+			Account account,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "20") int size,
 			@RequestParam(required = false) String status,
 			@RequestParam(required = false) String side,
 			@RequestParam(required = false) String ticker) {
 		pageRequestValidator.validate(page, size);
-		Account account = accountResolver.resolve(accountNumber);
 		OrderFilter filter = OrderFilter.of(status, side, ticker);
-		Page<Order> orders = orderHistoryUseCase.query(account.id(), filter, PageRequest.of(page, size));
+		Page<Order> orders = orderHistoryUseCase.query(account, filter, PageRequest.of(page, size));
 		return ResponseEntity.ok(orderMapper.toPageResponse(orders));
 	}
 
@@ -149,11 +147,14 @@ public class OrderController {
 	 * responden {@code 409 Conflict}. Una orden inexistente o de otra cuenta
 	 * responde {@code 404 Not Found} sin revelar su existencia (spec §9).</p>
 	 *
-	 * @param accountNumber numero de cuenta
+	 * @param account contexto de la cuenta
 	 * @param orderId identificador de la orden a cancelar
 	 * @return la orden cancelada
 	 */
 	@DeleteMapping("/{orderId}")
+	@Parameters({
+			@Parameter(name = "X-AccountNumber", in = ParameterIn.HEADER, required = true,
+					description = "Numero de cuenta", schema = @Schema(type = "string"))})
 	@ApiResponses({
 			@ApiResponse(responseCode = "400", description = "Solicitud invalida o error de validacion",
 					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -162,9 +163,9 @@ public class OrderController {
 			@ApiResponse(responseCode = "409", description = "La orden no esta en estado NEW",
 					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 	public ResponseEntity<OrderResponse> cancelOrder(
-			@RequestHeader(value = ACCOUNT_HEADER, required = true) String accountNumber,
+			Account account,
 			@PathVariable("orderId") Long orderId) {
-		Order order = cancelOrderUseCase.cancel(accountNumber, orderId);
+		Order order = cancelOrderUseCase.cancel(account, orderId);
 		return ResponseEntity.ok(orderMapper.toResponse(order));
 	}
 

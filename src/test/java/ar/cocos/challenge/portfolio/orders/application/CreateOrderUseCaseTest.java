@@ -106,7 +106,7 @@ class CreateOrderUseCaseTest {
 		given(orderRepository.sumFilledCash(1L)).willReturn(new BigDecimal("100.00"));
 		given(orderRepository.sumReservedCash(1L)).willReturn(BigDecimal.ZERO);
 
-		Order order = createOrderUseCase.create(ACCOUNT_NUMBER, KEY, request("YPFD", OrderSide.BUY, OrderType.MARKET,
+		Order order = createOrderUseCase.create(account, KEY, request("YPFD", OrderSide.BUY, OrderType.MARKET,
 				"10", null, null));
 
 		assertThat(order.getStatus()).isEqualTo(OrderStatus.REJECTED);
@@ -121,7 +121,7 @@ class CreateOrderUseCaseTest {
 		given(orderRepository.sumFilledShares(1L, 10L)).willReturn(new BigDecimal("5.00"));
 		given(orderRepository.sumReservedShares(1L, 10L)).willReturn(BigDecimal.ZERO);
 
-		Order order = createOrderUseCase.create(ACCOUNT_NUMBER, KEY, request("YPFD", OrderSide.SELL, OrderType.MARKET,
+		Order order = createOrderUseCase.create(account, KEY, request("YPFD", OrderSide.SELL, OrderType.MARKET,
 				"10", null, null));
 
 		assertThat(order.getStatus()).isEqualTo(OrderStatus.REJECTED);
@@ -134,7 +134,7 @@ class CreateOrderUseCaseTest {
 		given(instrumentRepository.findByTicker("IRCP")).willReturn(Optional.of(
 				new Instrument(12L, "IRCP", "IRSA Propiedades", ar.cocos.challenge.portfolio.instruments.domain.InstrumentType.ACCIONES)));
 
-		Order order = createOrderUseCase.create(ACCOUNT_NUMBER, KEY, request("IRCP", OrderSide.BUY, OrderType.MARKET,
+		Order order = createOrderUseCase.create(account, KEY, request("IRCP", OrderSide.BUY, OrderType.MARKET,
 				"10", null, null));
 
 		assertThat(order.getStatus()).isEqualTo(OrderStatus.REJECTED);
@@ -152,7 +152,7 @@ class CreateOrderUseCaseTest {
 		given(orderRepository.sumFilledCash(1L)).willReturn(new BigDecimal("100000.00"));
 		given(orderRepository.sumReservedCash(1L)).willReturn(BigDecimal.ZERO);
 
-		Order order = createOrderUseCase.create(ACCOUNT_NUMBER, KEY, request("YPFD", OrderSide.BUY, OrderType.MARKET,
+		Order order = createOrderUseCase.create(account, KEY, request("YPFD", OrderSide.BUY, OrderType.MARKET,
 				null, "500", null));
 
 		assertThat(order.getStatus()).isEqualTo(OrderStatus.REJECTED);
@@ -170,7 +170,7 @@ class CreateOrderUseCaseTest {
 		given(orderRepository.sumFilledCash(1L)).willReturn(new BigDecimal("100000.00"));
 		given(orderRepository.sumReservedCash(1L)).willReturn(BigDecimal.ZERO);
 
-		Order order = createOrderUseCase.create(ACCOUNT_NUMBER, KEY, request("YPFD", OrderSide.BUY, OrderType.MARKET,
+		Order order = createOrderUseCase.create(account, KEY, request("YPFD", OrderSide.BUY, OrderType.MARKET,
 				null, "5000", null));
 
 		assertThat(order.getStatus()).isEqualTo(OrderStatus.FILLED);
@@ -184,7 +184,7 @@ class CreateOrderUseCaseTest {
 		given(orderRepository.sumFilledCash(1L)).willReturn(new BigDecimal("100000.00"));
 		given(orderRepository.sumReservedCash(1L)).willReturn(BigDecimal.ZERO);
 
-		Order order = createOrderUseCase.create(ACCOUNT_NUMBER, KEY, request("YPFD", OrderSide.BUY, OrderType.LIMIT,
+		Order order = createOrderUseCase.create(account, KEY, request("YPFD", OrderSide.BUY, OrderType.LIMIT,
 				"1", null, "20000.00"));
 
 		assertThat(order.getStatus()).isEqualTo(OrderStatus.NEW);
@@ -197,7 +197,7 @@ class CreateOrderUseCaseTest {
 		given(idempotencyRepository.findByAccountIdAndKey(1L, KEY))
 				.willReturn(Optional.of(new IdempotencyKey(1L, 1L, KEY, "otra-huella", 100L, NOW)));
 
-		assertThatThrownBy(() -> createOrderUseCase.create(ACCOUNT_NUMBER, KEY,
+		assertThatThrownBy(() -> createOrderUseCase.create(account, KEY,
 				request("YPFD", OrderSide.BUY, OrderType.LIMIT, "1", null, "20000.00")))
 				.isInstanceOf(ConflictException.class);
 	}
@@ -213,7 +213,7 @@ class CreateOrderUseCaseTest {
 				OrderSide.BUY, new BigDecimal("1"), new BigDecimal("20000.00"), OrderType.LIMIT, OrderStatus.NEW, null,
 				NOW)));
 
-		Order order = createOrderUseCase.create(ACCOUNT_NUMBER, KEY,
+		Order order = createOrderUseCase.create(account, KEY,
 				request("YPFD", OrderSide.BUY, OrderType.LIMIT, "1", null, "20000.00"));
 
 		assertThat(order.getId()).isEqualTo(100L);
@@ -224,7 +224,7 @@ class CreateOrderUseCaseTest {
 	@Test
 	@DisplayName("Una solicitud invalida no se persiste")
 	void doesNotPersistInvalidRequest() {
-		assertThatThrownBy(() -> createOrderUseCase.create(ACCOUNT_NUMBER, KEY,
+		assertThatThrownBy(() -> createOrderUseCase.create(account, KEY,
 				request("YPFD", OrderSide.BUY, OrderType.MARKET, "10", "1000", null)))
 				.isInstanceOf(InvalidRequestException.class);
 

@@ -46,9 +46,15 @@ public class InstrumentRepositoryAdapter implements InstrumentRepository {
 	public List<Instrument> search(String query) {
 		return jpaInstrumentRepository.search(query).stream().map(this::toDomain).toList();
 	}
+	
+	@Override
+	public List<Instrument> findAllById(List<Long> ids) {
+		return jpaInstrumentRepository.findAllById(ids).stream().map(this::toDomain).toList();		
+	}
 
 	private Instrument toDomain(InstrumentEntity entity) {
 		return new Instrument(entity.getId(), entity.getTicker(), entity.getName(), entity.getType());
 	}
+
 
 }

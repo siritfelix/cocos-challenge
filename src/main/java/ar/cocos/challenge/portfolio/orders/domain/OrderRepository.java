@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import ar.cocos.challenge.portfolio.users.domain.Account;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -126,5 +127,14 @@ public interface OrderRepository {
 	 * @return las ordenes ejecutadas del par, ordenadas por fecha ascendente
 	 */
 	List<Order> findExecutedTradesInChronologicalOrder(Long accountId, Long instrumentId);
+
+	/**
+	 * Busca la ultima ordenes de la cuenta, usada para
+	 * derivar el costo promedio ponderado.
+	 *
+	 * @param account cuanta del usuario
+	 * @return las ordenes ejecutadas de la cuenta, ordenadas por fecha ascendente
+	 */
+	List<Order> findExecutedTradesInChronologicalOrder(Account account);
 
 }

@@ -40,4 +40,12 @@ public interface InstrumentRepository {
 	 */
 	List<Instrument> search(String query);
 
+	/**
+	 * Busca una lista instrumento por su identificadores interno.
+	 *
+	 * @param ids identificadores internos del instrumento
+	 * @return el instrumento, o vacio si no existe
+	 */
+	List<Instrument> findAllById(List<Long> ids);
+
 }

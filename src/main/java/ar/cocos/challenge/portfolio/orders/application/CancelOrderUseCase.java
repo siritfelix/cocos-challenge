@@ -5,7 +5,6 @@ import ar.cocos.challenge.portfolio.orders.domain.Order;
 import ar.cocos.challenge.portfolio.orders.domain.OrderRepository;
 import ar.cocos.challenge.portfolio.orders.domain.OrderStatus;
 import ar.cocos.challenge.portfolio.shared.domain.AccountNotFoundException;
-import ar.cocos.challenge.portfolio.shared.domain.MissingAccountHeaderException;
 import ar.cocos.challenge.portfolio.shared.domain.ResourceNotFoundException;
 import ar.cocos.challenge.portfolio.shared.infrastructure.LockTimeoutInitializer;
 import ar.cocos.challenge.portfolio.users.domain.Account;
@@ -21,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  * liberacion es implicita, porque las reservas se derivan de las ordenes en
  * estado {@code NEW} (spec FR-063).</p>
  *
- * <p>Una orden inexistente o perteneciente a otra cuenta produce el mismo
+ * <p>Una orden inexistente o perteneciente a otra cuenta produce el mismocle
  * {@code 404}, de modo que no se revela la existencia de ordenes ajenas
  * (spec FR-065).</p>
  */
@@ -47,7 +46,7 @@ public class CancelOrderUseCase {
 	/**
 	 * Cancela la orden indicada.
 	 *
-	 * @param accountNumber numero de cuenta de la cabecera {@code X-AccountNumber}
+	 * @param account contexto de la cuenta
 	 * @param orderId identificador de la orden a cancelar
 	 * @return la orden cancelada
 	 * @throws AccountNotFoundException si la cuenta no existe
@@ -57,13 +56,7 @@ public class CancelOrderUseCase {
 	 *         {@code NEW}
 	 */
 	@Transactional
-	public Order cancel(String accountNumber, Long orderId) {
-		// La cabecera de cuenta ausente es un error de solicitud (400), no una
-		// cuenta inexistente (404). Se valida antes de consultar la base.
-		if (accountNumber == null || accountNumber.isBlank()) {
-			throw new MissingAccountHeaderException("Missing required header 'X-AccountNumber'");
-		}
-
+	public Order cancel(Account account, Long orderId) {
 		// El limite de espera por bloqueos se emite como PRIMERA sentencia de la
 		// transaccion, antes de cualquier lectura (research R-006).
 		lockTimeoutInitializer.apply();
@@ -71,10 +64,10 @@ public class CancelOrderUseCase {
 		// El lock de la cuenta serializa las cancelaciones concurrentes de sus
 		// ordenes, igual que las operaciones que consumen recursos
 		// (spec FR-066).
-		Account account = accountRepository.findByAccountNumberForUpdate(accountNumber)
-				.orElseThrow(() -> new AccountNotFoundException(accountNumber));
+		Account resolvedAccount = accountRepository.findByAccountNumberForUpdate(account.accountNumber())
+				.orElseThrow(() -> new AccountNotFoundException(account.accountNumber()));
 
-		Order order = orderRepository.findByIdAndAccountId(orderId, account.id())
+		Order order = orderRepository.findByIdAndAccountId(orderId, resolvedAccount.id())
 				.orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
 
 		if (order.getStatus() != OrderStatus.NEW) {
